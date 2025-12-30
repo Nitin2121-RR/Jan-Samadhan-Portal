@@ -1,5 +1,5 @@
 {
-      "name": "Web App Mockup Design",
+      "name": "jan-samadhan-frontend",
       "version": "0.1.0",
       "private": true,
       "dependencies": {
@@ -50,7 +50,7 @@
       "devDependencies": {
             "@types/node": "^20.10.0",
             "@vitejs/plugin-react-swc": "^3.10.2",
-            "vite": "6.3.5"
+            "vite": "^6.3.5"
       },
       "scripts": {
             "dev": "vite",

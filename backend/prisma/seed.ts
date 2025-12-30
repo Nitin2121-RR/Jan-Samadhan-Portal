@@ -1,7 +1,15 @@
-import { PrismaClient, AuthorityLevel } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
+
+// Define AuthorityLevel enum locally to match Prisma schema
+enum AuthorityLevel {
+  director = 'director',
+  nodal_officer = 'nodal_officer', 
+  gro = 'gro',
+  field_officer = 'field_officer'
+}
 
 const DEPARTMENTS = [
   { code: 'PWD', name: 'Public Works Department', category: 'Roads & Infrastructure', description: 'Handles roads, bridges, and public infrastructure' },
