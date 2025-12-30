@@ -9,7 +9,7 @@
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "build": "npx prisma generate && npx tsc --noEmitOnError",
-    "start": "node dist/server.js",
+    "start": "node dist/src/server.js",
     "seed": "npx prisma db seed",
     "postinstall": "prisma generate",
     "prisma:generate": "prisma generate",

@@ -1,0 +1,184 @@
+// PostgreSQL version for production deployment
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  citizen
+  authority
+}
+
+enum AuthorityLevel {
+  director        // Director of Grievances
+  nodal_officer   // Nodal Public Grievance Officer
+  gro             // Grievance Redressal Officer
+  field_officer   // Subordinate/Field Officer
+}
+
+enum GrievanceStatus {
+  pending
+  acknowledged
+  in_progress
+  resolved
+  escalated
+}
+
+model Department {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  code        String   @unique
+  description String?
+  category    String   // Maps to grievance category
+
+  // Relations
+  authorities User[]
+  grievances  Grievance[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String
+  phone     String?
+  role      UserRole @default(citizen)
+  
+  // Citizen fields
+  address   String?
+  
+  // Authority fields (legacy - kept for backwards compatibility)
+  department String?
+  position   String?
+
+  // New department relation
+  departmentId    String?
+  department_rel  Department?     @relation(fields: [departmentId], references: [id])
+  authorityLevel  AuthorityLevel?
+
+  // Blockchain fields
+  walletAddress String? @unique
+  walletLinkedAt DateTime?
+  
+  // Relations
+  grievances      Grievance[]      @relation("GrievanceAuthor")
+  assignedGrievances Grievance[]    @relation("GrievanceAssignee")
+  upvotes         Upvote[]
+  notifications   Notification[]
+  grievanceUpdates GrievanceUpdate[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Grievance {
+  id            String          @id @default(uuid())
+  title         String
+  description   String
+  category      String
+  department    String?         // Legacy field
+  departmentId  String?
+  department_rel Department?    @relation(fields: [departmentId], references: [id])
+  status        GrievanceStatus @default(pending)
+  priorityScore Int             @default(0)
+  severity      Int             @default(1)
+
+  // Location
+  latitude      Float?
+  longitude     Float?
+  address       String?
+  ward          String?
+
+  // AI Features - PostgreSQL supports arrays and JSON
+  embedding         Float[]       // Vector embedding for duplicate detection
+  detectedLanguage  String?       // Original language detected (e.g., "hi", "en", "ta")
+  translatedTitle   String?       // English translation if original was in another language
+  translatedDesc    String?       // English translation of description
+  autoResponse      String?       // AI-generated acknowledgment response
+  imageAnalysis     Json?         // AI analysis of uploaded images
+  aiAnalysisHash    String?       // Hash of AI analysis for blockchain verification
+  duplicateOf       String?       // ID of original grievance if this is a duplicate
+  similarGrievances String[]      // IDs of similar grievances
+
+  // Relations
+  userId        String
+  user          User            @relation("GrievanceAuthor", fields: [userId], references: [id])
+
+  assignedToId  String?
+  assignedTo    User?           @relation("GrievanceAssignee", fields: [assignedToId], references: [id])
+
+  files         GrievanceFile[]
+  upvotes       Upvote[]
+  updates       GrievanceUpdate[]
+
+  isEscalated   Boolean         @default(false)
+
+  // Blockchain fields
+  blockchainHash String? @unique
+  blockchainTxHash String?
+  verifiedOnChain Boolean @default(false)
+
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  resolvedAt    DateTime?
+}
+
+model GrievanceFile {
+  id          String    @id @default(uuid())
+  grievanceId String?
+  grievance   Grievance? @relation(fields: [grievanceId], references: [id], onDelete: Cascade)
+  filename    String
+  filepath    String
+  mimetype    String
+  size        Int
+
+  createdAt   DateTime  @default(now())
+}
+
+model GrievanceUpdate {
+  id          String          @id @default(uuid())
+  grievanceId String
+  grievance   Grievance      @relation(fields: [grievanceId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User            @relation(fields: [userId], references: [id])
+  message     String?
+  status      GrievanceStatus?
+  
+  // Blockchain fields
+  blockchainTxHash String?
+  
+  createdAt   DateTime        @default(now())
+}
+
+model Upvote {
+  id          String    @id @default(uuid())
+  grievanceId String
+  grievance   Grievance @relation(fields: [grievanceId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  createdAt   DateTime  @default(now())
+
+  @@unique([grievanceId, userId])
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String
+  message   String
+  read      Boolean  @default(false)
+  
+  createdAt DateTime @default(now())
+}
