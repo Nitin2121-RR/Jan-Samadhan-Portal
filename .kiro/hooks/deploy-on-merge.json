@@ -1,0 +1,23 @@
+{
+  "name": "Deploy on Main Branch Merge",
+  "description": "Trigger deployment when changes are merged to main branch",
+  "trigger": {
+    "type": "git_branch_change",
+    "branch": "main"
+  },
+  "action": {
+    "type": "agent_message",
+    "message": "Main branch has been updated. Please review the changes and consider deploying to production if all tests pass."
+  },
+  "enabled": true,
+  "conditions": [
+    {
+      "type": "git_branch",
+      "branch": "main"
+    },
+    {
+      "type": "file_exists", 
+      "path": "DEPLOYMENT_GUIDE.md"
+    }
+  ]
+}

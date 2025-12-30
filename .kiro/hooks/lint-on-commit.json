@@ -1,0 +1,20 @@
+{
+  "name": "Lint Before Commit",
+  "description": "Run ESLint and Prettier checks before committing code",
+  "trigger": {
+    "type": "pre_commit"
+  },
+  "action": {
+    "type": "shell_command",
+    "command": "npm run lint && npm run format:check",
+    "workingDirectory": "{{workspace_root}}"
+  },
+  "enabled": true,
+  "conditions": [
+    {
+      "type": "git_repository",
+      "path": "{{workspace_root}}"
+    }
+  ],
+  "failOnError": true
+}

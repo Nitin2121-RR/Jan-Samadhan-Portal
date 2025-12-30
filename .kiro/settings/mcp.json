@@ -1,0 +1,51 @@
+{
+  "mcpServers": {
+    "postgres-mcp": {
+      "command": "uvx",
+      "args": ["mcp-server-postgres", "--connection-string", "postgresql://user:password@localhost:5432/jansamadhan"],
+      "env": {
+        "FASTMCP_LOG_LEVEL": "ERROR"
+      },
+      "disabled": false,
+      "autoApprove": ["query", "schema"]
+    },
+    "filesystem-mcp": {
+      "command": "uvx", 
+      "args": ["mcp-server-filesystem", "--base-directory", "./"],
+      "env": {
+        "FASTMCP_LOG_LEVEL": "ERROR"
+      },
+      "disabled": false,
+      "autoApprove": ["read_file", "list_directory"]
+    },
+    "git-mcp": {
+      "command": "uvx",
+      "args": ["mcp-server-git"],
+      "env": {
+        "FASTMCP_LOG_LEVEL": "ERROR"
+      },
+      "disabled": false,
+      "autoApprove": ["git_status", "git_log", "git_diff"]
+    },
+    "web-search": {
+      "command": "uvx",
+      "args": ["mcp-server-brave-search"],
+      "env": {
+        "BRAVE_API_KEY": "${BRAVE_API_KEY}",
+        "FASTMCP_LOG_LEVEL": "ERROR"
+      },
+      "disabled": false,
+      "autoApprove": ["web_search"]
+    },
+    "github-mcp": {
+      "command": "uvx",
+      "args": ["mcp-server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}",
+        "FASTMCP_LOG_LEVEL": "ERROR"
+      },
+      "disabled": false,
+      "autoApprove": ["search_repositories", "get_file_contents", "list_issues"]
+    }
+  }
+}

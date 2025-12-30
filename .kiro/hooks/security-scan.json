@@ -1,0 +1,26 @@
+{
+  "name": "Security Vulnerability Scan",
+  "description": "Run security audit when package.json dependencies are updated",
+  "trigger": {
+    "type": "file_save",
+    "pattern": "**/package.json"
+  },
+  "action": {
+    "type": "shell_command",
+    "command": "npm audit --audit-level=moderate",
+    "workingDirectory": "{{file_directory}}"
+  },
+  "enabled": true,
+  "conditions": [
+    {
+      "type": "file_contains",
+      "path": "{{file_path}}",
+      "content": "dependencies"
+    }
+  ],
+  "notifications": {
+    "onSuccess": false,
+    "onFailure": true,
+    "message": "Security vulnerabilities detected in dependencies. Please review and update."
+  }
+}
