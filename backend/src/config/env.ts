@@ -43,6 +43,7 @@ export default {
     uploadDir: env.UPLOAD_DIR,
   },
   frontendUrl: env.FRONTEND_URL,
+  corsOrigin: env.FRONTEND_URL,
   cloudinary: {
     cloudName: env.CLOUDINARY_CLOUD_NAME,
     apiKey: env.CLOUDINARY_API_KEY,

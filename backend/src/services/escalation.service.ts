@@ -3,7 +3,7 @@ import { notifyGrievanceStatusChange } from './notification.service';
 import blockchainService from './blockchain.service';
 
 // Authority levels in order of hierarchy
-const AUTHORITY_HIERARCHY = ['gro', 'officer', 'nodal_officer', 'director'];
+const AUTHORITY_HIERARCHY = ['field_officer', 'gro', 'nodal_officer', 'director'];
 
 class EscalationService {
   // Check and escalate overdue grievances
@@ -67,7 +67,7 @@ class EscalationService {
         where: {
           role: 'authority',
           departmentId: grievance.departmentId,
-          authorityLevel: nextLevel,
+          authorityLevel: nextLevel as any,
         },
         select: { id: true, name: true, authorityLevel: true },
       });
@@ -78,7 +78,7 @@ class EscalationService {
       newAssignee = await prisma.user.findFirst({
         where: {
           role: 'authority',
-          authorityLevel: nextLevel,
+          authorityLevel: nextLevel as any,
         },
         select: { id: true, name: true, authorityLevel: true },
       });

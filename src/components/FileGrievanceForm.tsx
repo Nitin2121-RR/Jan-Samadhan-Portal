@@ -86,6 +86,7 @@ export function FileGrievanceForm({ onSubmit, onCancel }: FileGrievanceFormProps
   const [location, setLocation] = useState<{ address: string; lat?: number; lng?: number }>({ address: "" });
   const [files, setFiles] = useState<FilePreview[]>([]);
   const [uploadingFiles, setUploadingFiles] = useState(false);
+  console.log('uploadingFiles state:', uploadingFiles); // Keep for debugging
 
   // AI Analysis Results
   const [aiAnalysis, setAiAnalysis] = useState<AIAnalysisResult | null>(null);

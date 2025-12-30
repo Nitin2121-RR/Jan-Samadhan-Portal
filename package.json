@@ -27,6 +27,8 @@
             "@radix-ui/react-toggle-group": "^1.1.2",
             "@radix-ui/react-tooltip": "^1.1.8",
             "@types/leaflet": "^1.9.21",
+            "@types/react": "^19.2.7",
+            "@types/react-dom": "^19.2.3",
             "class-variance-authority": "^0.7.1",
             "clsx": "^2.1.1",
             "ethers": "^6.16.0",
@@ -42,6 +44,7 @@
             "socket.io-client": "^4.8.3",
             "sonner": "^2.0.3",
             "tailwind-merge": "^2.5.4",
+            "typescript": "^5.9.3",
             "vaul": "^1.1.2"
       },
       "devDependencies": {

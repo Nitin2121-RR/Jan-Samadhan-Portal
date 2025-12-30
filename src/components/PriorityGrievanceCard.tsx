@@ -38,7 +38,7 @@ interface PriorityGrievanceCardProps {
 }
 
 export function PriorityGrievanceCard({
-  id,
+  id: _id,
   title,
   description,
   category,

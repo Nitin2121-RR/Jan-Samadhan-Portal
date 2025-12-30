@@ -27,9 +27,9 @@ class ApiClient {
     options: RequestInit = {}
   ): Promise<T> {
     const url = `${this.baseURL}${endpoint}`;
-    const headers: HeadersInit = {
+    const headers: Record<string, string> = {
       'Content-Type': 'application/json',
-      ...options.headers,
+      ...(options.headers as Record<string, string> || {}),
     };
 
     if (this.token) {
@@ -276,16 +276,6 @@ class ApiClient {
       {
         method: 'POST',
         body: JSON.stringify({ assignedToId, reason }),
-      }
-    );
-  }
-
-  async updateGrievanceStatus(id: string, status: string, message?: string) {
-    return this.request<{ grievance: any }>(
-      `/authority/grievances/${id}/status`,
-      {
-        method: 'PATCH',
-        body: JSON.stringify({ status, message }),
       }
     );
   }

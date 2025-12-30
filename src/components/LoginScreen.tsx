@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { Button } from "./ui/button";
-import { Input } from "./ui/input";
 import { LocationInput } from "./ui/LocationInput";
 import { Scale, Mail, Lock, User, Phone, ArrowLeft, Building, Briefcase, Loader2, CheckCircle, ChevronDown } from "lucide-react";
 import { authService } from "../services/auth.service";

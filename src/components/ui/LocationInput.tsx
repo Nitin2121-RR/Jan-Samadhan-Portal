@@ -188,9 +188,9 @@ export function LocationInput({
     // Build a shorter address if we have address components
     if (addr) {
       const parts: string[] = [];
-      if (addr.road || addr.street) parts.push(addr.road || addr.street);
-      if (addr.neighbourhood || addr.suburb) parts.push(addr.neighbourhood || addr.suburb);
-      if (addr.city || addr.town || addr.village) parts.push(addr.city || addr.town || addr.village);
+      if (addr.road || addr.street) parts.push((addr.road || addr.street)!);
+      if (addr.neighbourhood || addr.suburb) parts.push((addr.neighbourhood || addr.suburb)!);
+      if (addr.city || addr.town || addr.village) parts.push((addr.city || addr.town || addr.village)!);
       if (addr.state) parts.push(addr.state);
       if (parts.length > 0) formattedAddress = parts.join(", ");
     }

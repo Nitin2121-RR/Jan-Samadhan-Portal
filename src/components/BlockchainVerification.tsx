@@ -1,6 +1,6 @@
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
-import { CheckCircle2, ExternalLink, Loader2, ShieldCheck, ShieldAlert } from "lucide-react";
+import { CheckCircle2, ExternalLink, Loader2, ShieldCheck } from "lucide-react";
 import { useState } from "react";
 import { apiClient } from "../services/api";
 import { toast } from "sonner";
