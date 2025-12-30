@@ -1,0 +1,166 @@
+// SQLite version for local development
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+// SQLite doesn't support enums, so we use String with constraints
+
+model Department {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  code        String   @unique
+  description String?
+  category    String   // Maps to grievance category
+
+  // Relations
+  authorities User[]
+  grievances  Grievance[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String
+  phone     String?
+  role      String @default("citizen") // "citizen" or "authority"
+  
+  // Citizen fields
+  address   String?
+  
+  // Authority fields (legacy - kept for backwards compatibility)
+  department String?
+  position   String?
+
+  // New department relation
+  departmentId    String?
+  department_rel  Department?     @relation(fields: [departmentId], references: [id])
+  authorityLevel  String? // "director", "nodal_officer", "gro", "field_officer"
+
+  // Blockchain fields
+  walletAddress String? @unique
+  walletLinkedAt DateTime?
+  
+  // Relations
+  grievances      Grievance[]      @relation("GrievanceAuthor")
+  assignedGrievances Grievance[]    @relation("GrievanceAssignee")
+  upvotes         Upvote[]
+  notifications   Notification[]
+  grievanceUpdates GrievanceUpdate[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Grievance {
+  id            String          @id @default(uuid())
+  title         String
+  description   String
+  category      String
+  department    String?         // Legacy field
+  departmentId  String?
+  department_rel Department?    @relation(fields: [departmentId], references: [id])
+  status        String @default("pending") // "pending", "acknowledged", "in_progress", "resolved", "escalated"
+  priorityScore Int             @default(0)
+  severity      Int             @default(1)
+
+  // Location
+  latitude      Float?
+  longitude     Float?
+  address       String?
+  ward          String?
+
+  // AI Features - SQLite doesn't support arrays, so we'll use JSON strings
+  embedding         String?       // JSON string of vector embedding
+  detectedLanguage  String?       // Original language detected (e.g., "hi", "en", "ta")
+  translatedTitle   String?       // English translation if original was in another language
+  translatedDesc    String?       // English translation of description
+  autoResponse      String?       // AI-generated acknowledgment response
+  imageAnalysis     String?       // JSON string of AI analysis
+  aiAnalysisHash    String?       // Hash of AI analysis for blockchain verification
+  duplicateOf       String?       // ID of original grievance if this is a duplicate
+  similarGrievances String?       // JSON string of similar grievance IDs
+
+  // Relations
+  userId        String
+  user          User            @relation("GrievanceAuthor", fields: [userId], references: [id])
+
+  assignedToId  String?
+  assignedTo    User?           @relation("GrievanceAssignee", fields: [assignedToId], references: [id])
+
+  files         GrievanceFile[]
+  upvotes       Upvote[]
+  updates       GrievanceUpdate[]
+
+  isEscalated   Boolean         @default(false)
+
+  // Blockchain fields
+  blockchainHash String? @unique
+  blockchainTxHash String?
+  verifiedOnChain Boolean @default(false)
+
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  resolvedAt    DateTime?
+}
+
+model GrievanceFile {
+  id          String    @id @default(uuid())
+  grievanceId String?
+  grievance   Grievance? @relation(fields: [grievanceId], references: [id], onDelete: Cascade)
+  filename    String
+  filepath    String
+  mimetype    String
+  size        Int
+
+  createdAt   DateTime  @default(now())
+}
+
+model GrievanceUpdate {
+  id          String          @id @default(uuid())
+  grievanceId String
+  grievance   Grievance      @relation(fields: [grievanceId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User            @relation(fields: [userId], references: [id])
+  message     String?
+  status      String? // "pending", "acknowledged", "in_progress", "resolved", "escalated"
+  
+  // Blockchain fields
+  blockchainTxHash String?
+  
+  createdAt   DateTime        @default(now())
+}
+
+model Upvote {
+  id          String    @id @default(uuid())
+  grievanceId String
+  grievance   Grievance @relation(fields: [grievanceId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  createdAt   DateTime  @default(now())
+
+  @@unique([grievanceId, userId])
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String
+  message   String
+  read      Boolean  @default(false)
+  
+  createdAt DateTime @default(now())
+}

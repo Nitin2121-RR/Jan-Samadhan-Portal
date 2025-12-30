@@ -1,0 +1,74 @@
+# Dependencies
+node_modules/
+*/node_modules/
+
+# Production builds
+dist/
+build/
+*/dist/
+*/build/
+
+# Environment files
+.env
+.env.local
+.env.production
+.env.development
+backend/.env
+contracts/.env
+
+# Database
+*.db
+*.sqlite
+backend/dev.db
+backend/prisma/dev.db
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Uploads
+uploads/
+backend/uploads/
+
+# Cache
+.cache/
+.parcel-cache/
+
+# Hardhat
+cache/
+artifacts/
+contracts/cache/
+contracts/artifacts/
+
+# TypeScript
+*.tsbuildinfo
+
+# Temporary files
+tmp/
+temp/

@@ -1,0 +1,98 @@
+/* Consistent spacing utilities for Jan-Samadhan Portal */
+
+/* Container spacing */
+.container-spacing {
+  padding: 16px;
+}
+
+@media (min-width: 640px) {
+  .container-spacing {
+    padding: 20px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .container-spacing {
+    padding: 24px;
+  }
+}
+
+/* Card spacing */
+.card-spacing {
+  padding: 16px;
+}
+
+@media (min-width: 640px) {
+  .card-spacing {
+    padding: 20px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .card-spacing {
+    padding: 24px;
+  }
+}
+
+/* Section gaps */
+.section-gap {
+  gap: 16px;
+}
+
+@media (min-width: 640px) {
+  .section-gap {
+    gap: 20px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .section-gap {
+    gap: 24px;
+  }
+}
+
+/* Form spacing */
+.form-spacing {
+  gap: 16px;
+}
+
+.form-field-spacing {
+  gap: 8px;
+}
+
+@media (min-width: 640px) {
+  .form-spacing {
+    gap: 20px;
+  }
+  
+  .form-field-spacing {
+    gap: 12px;
+  }
+}
+
+/* Grid gaps */
+.grid-gap-sm {
+  gap: 12px;
+}
+
+.grid-gap-md {
+  gap: 16px;
+}
+
+.grid-gap-lg {
+  gap: 20px;
+}
+
+@media (min-width: 640px) {
+  .grid-gap-sm {
+    gap: 16px;
+  }
+  
+  .grid-gap-md {
+    gap: 20px;
+  }
+  
+  .grid-gap-lg {
+    gap: 24px;
+  }
+}
