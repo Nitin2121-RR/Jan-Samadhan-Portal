@@ -121,9 +121,9 @@ cd backend && npm run dev  # Backend (port 5001)
 
 ## 🌐 Deployment URLs
 
-- **Frontend**: https://jan-samadhan.vercel.app
-- **Backend**: https://jan-samadhan-backend.railway.app
-- **Smart Contracts**: Deployed on Sepolia testnet
+- https://jan-sam.vercel.app/
+- User test account: citizen@test.com / Test@123
+- Authority test account: gro.pwd@test.com / Test@123
 
 ## 📄 License
 
