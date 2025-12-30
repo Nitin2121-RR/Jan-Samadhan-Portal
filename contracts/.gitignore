@@ -1,9 +1,98 @@
+# Dependencies
 node_modules/
-.env
+.pnp
+.pnp.js
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
+
+# Hardhat files
 cache/
 artifacts/
+typechain/
 typechain-types/
+
+# Environment files
+.env
+.env.local
+.env.production
+.env.development
+.env.staging
+.env.test
+*.env
+
+# Coverage
 coverage/
 coverage.json
+*.lcov
+.nyc_output
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# Cache
+.cache/
+.eslintcache
+.stylelintcache
+
+# TypeScript
+*.tsbuildinfo
+.tscache/
+
+# Testing
+.jest/
+jest_*
+test-results/
+
+# Gas reports
+gas-report.txt
+
+# Deployment artifacts
+deployments/
+!deployments/localhost/
+
+# Tenderly
+.tenderly/
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Temporary files
+tmp/
+temp/
+.tmp/
+
+# Backup files
+*.bak
+*.backup
+*.old
+
+# Openzeppelin
+.openzeppelin/
+
+# Foundry (if used alongside Hardhat)
+lib/
+broadcast/
+forge-cache/
 
 
