@@ -1,0 +1,1 @@
+web: cd backend && npm ci && npm run build && npx prisma migrate deploy && node dist/server.js
