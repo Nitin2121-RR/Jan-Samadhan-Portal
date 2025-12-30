@@ -203,7 +203,11 @@ class AIService {
 
     for (const grievance of existingGrievances) {
       if (grievance.embedding && grievance.embedding.length > 0) {
-        const similarity = this.cosineSimilarity(newEmbedding, grievance.embedding);
+        // Ensure embedding is treated as number array
+        const embeddingArray = Array.isArray(grievance.embedding) 
+          ? grievance.embedding 
+          : JSON.parse(grievance.embedding as string);
+        const similarity = this.cosineSimilarity(newEmbedding, embeddingArray);
         if (similarity > 0.75) { // 75% similarity threshold
           similarGrievances.push({
             id: grievance.id,
