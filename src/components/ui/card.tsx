@@ -8,14 +8,14 @@ const cardVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-card border border-border rounded-xl shadow-sm",
-        elevated: "bg-card border border-border rounded-xl shadow-md hover:shadow-lg",
-        glass: "bg-card/60 backdrop-blur-xl border border-border/50 rounded-xl shadow-lg",
+        default: "rounded-xl shadow-sm",
+        elevated: "rounded-xl shadow-md hover:shadow-lg",
+        glass: "backdrop-blur-xl rounded-xl shadow-lg",
         ghost: "bg-transparent",
-        outline: "bg-transparent border border-border rounded-xl",
-        interactive: "bg-card border border-border rounded-xl shadow-sm hover:border-primary/50 hover:shadow-md hover:shadow-primary/10 cursor-pointer active:scale-[0.99]",
-        stat: "bg-card border border-border rounded-xl shadow-sm overflow-hidden",
-        feature: "bg-gradient-to-br from-card to-card/80 border border-border rounded-xl shadow-md",
+        outline: "bg-transparent rounded-xl",
+        interactive: "rounded-xl shadow-sm hover:shadow-md cursor-pointer active:scale-[0.99]",
+        stat: "rounded-xl shadow-sm overflow-hidden",
+        feature: "rounded-xl shadow-md",
       },
     },
     defaultVariants: {
@@ -27,12 +27,18 @@ const cardVariants = cva(
 function Card({
   className,
   variant,
+  style,
   ...props
 }: React.ComponentProps<"div"> & VariantProps<typeof cardVariants>) {
+  const baseStyle = variant === 'ghost' || variant === 'outline'
+    ? {}
+    : { backgroundColor: '#ffffff', border: '1px solid #e5e7eb' };
+
   return (
     <div
       data-slot="card"
       className={cn(cardVariants({ variant, className }))}
+      style={{ ...baseStyle, ...style }}
       {...props}
     />
   );

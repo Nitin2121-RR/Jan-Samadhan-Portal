@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
-import { Scale, Mail, Lock, User, Phone, ArrowLeft, MapPin, Building, Briefcase, Loader2, CheckCircle, ChevronDown } from "lucide-react";
+import { LocationInput } from "./ui/LocationInput";
+import { Scale, Mail, Lock, User, Phone, ArrowLeft, Building, Briefcase, Loader2, CheckCircle, ChevronDown } from "lucide-react";
 import { authService } from "../services/auth.service";
 import { apiClient } from "../services/api";
 import { toast } from "sonner";
@@ -600,17 +601,13 @@ export function LoginScreen({ onLogin, onBackToLanding }: LoginScreenProps) {
                       {formData.role === "citizen" && (
                         <div>
                           <label style={labelStyle}>Address</label>
-                          <div style={{ position: "relative" }}>
-                            <MapPin style={iconStyle} />
-                            <input
-                              type="text"
-                              value={formData.address}
-                              onChange={(e) => { setFormData({ ...formData, address: e.target.value }); if (errors.address) setErrors({ ...errors, address: "" }); }}
-                              style={{ ...inputStyle, borderColor: errors.address ? "#ef4444" : "#e5e7eb" }}
-                              placeholder="Enter your address"
-                            />
-                          </div>
-                          {errors.address && <p style={{ marginTop: "4px", fontSize: "12px", color: "#ef4444" }}>{errors.address}</p>}
+                          <LocationInput
+                            value={{ address: formData.address }}
+                            onChange={(loc) => { setFormData({ ...formData, address: loc.address }); if (errors.address) setErrors({ ...errors, address: "" }); }}
+                            placeholder="Enter your address"
+                            error={errors.address}
+                            required
+                          />
                         </div>
                       )}
 

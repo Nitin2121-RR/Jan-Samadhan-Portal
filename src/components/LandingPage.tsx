@@ -128,15 +128,15 @@ export function LandingPage({ onGetStarted, onNavigate }: LandingPageProps) {
       <section
         style={{
           position: "relative",
-          paddingTop: "40px",
-          paddingBottom: "40px",
+          paddingTop: "80px",
+          paddingBottom: "80px",
           background: "linear-gradient(180deg, #f1f5f9 0%, #ffffff 50%, #f8fafc 100%)",
           borderBottom: "1px solid #e2e8f0",
           overflow: "hidden"
         }}
       >
 
-        <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "0 16px", position: "relative" }}>
+        <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "0 24px", position: "relative" }}>
           {/* Badge */}
           <div style={{ display: "flex", justifyContent: "center", marginBottom: "24px" }}>
             <div
@@ -267,7 +267,7 @@ export function LandingPage({ onGetStarted, onNavigate }: LandingPageProps) {
       </section>
 
       {/* Features Section */}
-      <section style={{ padding: "40px 16px", backgroundColor: "#f8fafc" }}>
+      <section style={{ padding: "80px 24px", backgroundColor: "#f8fafc" }}>
         <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
           <div style={{ textAlign: "center", marginBottom: "60px" }}>
             <h2 style={{ fontSize: "clamp(24px, 4vw, 40px)", fontWeight: 700, color: "#111827", marginBottom: "16px" }}>
@@ -334,7 +334,7 @@ export function LandingPage({ onGetStarted, onNavigate }: LandingPageProps) {
       </section>
 
       {/* How It Works */}
-      <section style={{ padding: "40px 16px", backgroundColor: "#ffffff", borderTop: "1px solid #e2e8f0" }}>
+      <section style={{ padding: "80px 24px", backgroundColor: "#ffffff", borderTop: "1px solid #e2e8f0" }}>
         <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
           <div style={{ textAlign: "center", marginBottom: "60px" }}>
             <h2 style={{ fontSize: "clamp(24px, 4vw, 40px)", fontWeight: 700, color: "#111827", marginBottom: "16px" }}>
@@ -382,7 +382,7 @@ export function LandingPage({ onGetStarted, onNavigate }: LandingPageProps) {
       </section>
 
       {/* Benefits Section */}
-      <section style={{ padding: "40px 16px", backgroundColor: "#f8fafc", borderTop: "1px solid #e2e8f0" }}>
+      <section style={{ padding: "80px 24px", backgroundColor: "#f8fafc", borderTop: "1px solid #e2e8f0" }}>
         <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
           <div
             style={{
@@ -493,7 +493,7 @@ export function LandingPage({ onGetStarted, onNavigate }: LandingPageProps) {
       </section>
 
       {/* CTA Section */}
-      <section style={{ padding: "40px 16px", backgroundColor: "#ffffff", borderTop: "1px solid #e2e8f0" }}>
+      <section style={{ padding: "80px 24px", backgroundColor: "#ffffff", borderTop: "1px solid #e2e8f0" }}>
         <div style={{ maxWidth: "800px", margin: "0 auto", textAlign: "center" }}>
           <h2 style={{ fontSize: "clamp(24px, 4vw, 40px)", fontWeight: 700, color: "#111827", marginBottom: "16px" }}>
             Ready to Make a Difference?
@@ -528,7 +528,7 @@ export function LandingPage({ onGetStarted, onNavigate }: LandingPageProps) {
       {/* Footer */}
       <footer
         style={{
-          padding: "32px 16px",
+          padding: "48px 24px",
           backgroundColor: "#f8fafc",
           borderTop: "1px solid #e2e8f0"
         }}

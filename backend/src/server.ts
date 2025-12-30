@@ -90,13 +90,19 @@ const server = httpServer.listen(PORT, async () => {
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`📊 Environment: ${config.nodeEnv}`);
   console.log(`🔌 WebSocket server initialized`);
+  console.log(`🌐 Frontend URL: ${config.frontendUrl}`);
 
   // Test database connection
   try {
     await prisma.$connect();
-    console.log('✅ Database connected');
+    console.log('✅ Database connected successfully');
+    
+    // Test a simple query
+    const userCount = await prisma.user.count();
+    console.log(`📊 Database health check: ${userCount} users in database`);
   } catch (error) {
     console.error('❌ Database connection failed:', error);
+    console.error('Database URL (masked):', config.databaseUrl.replace(/:[^:@]*@/, ':***@'));
     process.exit(1);
   }
 
@@ -104,12 +110,15 @@ const server = httpServer.listen(PORT, async () => {
   if (blockchainService.isAvailable()) {
     try {
       await blockchainService.startEventListening();
+      console.log('✅ Blockchain event listeners started');
     } catch (error) {
       console.error('⚠️ Failed to start blockchain event listeners:', error);
     }
   } else {
     console.log('⚠️ Blockchain service not available, event listening disabled');
   }
+  
+  console.log('🎉 Server startup completed successfully');
 });
 
 // Handle server errors (e.g., port already in use)

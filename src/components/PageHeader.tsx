@@ -23,42 +23,42 @@ export function PageHeader({
   children,
 }: PageHeaderProps) {
   return (
-    <div className={cn("mb-6 sm:mb-8", className)}>
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex items-start gap-3 sm:gap-4 min-w-0">
+    <div className={cn(className)} style={{ marginBottom: '24px' }}>
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '16px' }}>
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px', minWidth: 0 }}>
           {onBack && (
             <Button
               variant="ghost"
               size="icon-sm"
               onClick={onBack}
-              className="flex-shrink-0 -ml-2 mt-0.5"
+              style={{ flexShrink: 0, marginLeft: '-8px', marginTop: '2px' }}
             >
               <ArrowLeft className="w-5 h-5" />
             </Button>
           )}
 
           {icon && (
-            <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+            <div style={{ flexShrink: 0, width: '48px', height: '48px', borderRadius: '12px', backgroundColor: 'rgba(3, 2, 19, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#030213' }}>
               {icon}
             </div>
           )}
 
-          <div className="min-w-0 flex-1">
-            <h1 className="text-2xl sm:text-3xl font-bold text-foreground font-display tracking-tight truncate">
+          <div style={{ minWidth: 0, flex: 1 }}>
+            <h1 style={{ fontSize: '24px', fontWeight: 700, letterSpacing: '-0.025em' }}>
               {title}
             </h1>
             {description && (
-              <p className="mt-1 text-sm sm:text-base text-muted-foreground line-clamp-2">
+              <p style={{ marginTop: '4px', fontSize: '14px', color: '#6b7280' }}>
                 {description}
               </p>
             )}
           </div>
         </div>
 
-        {action && <div className="flex-shrink-0">{action}</div>}
+        {action && <div style={{ flexShrink: 0 }}>{action}</div>}
       </div>
 
-      {children && <div className="mt-4 sm:mt-6">{children}</div>}
+      {children && <div style={{ marginTop: '16px' }}>{children}</div>}
     </div>
   );
 }

@@ -68,14 +68,14 @@ export function HomeScreen({ onFileGrievance }: HomeScreenProps) {
   ];
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
       {/* Welcome Hero */}
       <div
         style={{
           position: "relative",
           backgroundColor: "#ffffff",
           borderRadius: "16px",
-          padding: "20px",
+          padding: "32px",
           border: "1px solid #e2e8f0",
           overflow: "hidden",
         }}

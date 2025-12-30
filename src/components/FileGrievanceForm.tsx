@@ -4,7 +4,8 @@ import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Textarea } from "./ui/textarea";
 import { Card } from "./ui/card";
-import { Camera, MapPin, Upload, CheckCircle2, Mic, Sparkles, X, Loader2, Trash2, AlertTriangle, Languages, ImageIcon, Brain, Copy, Check, FileText } from "lucide-react";
+import { LocationInput } from "./ui/LocationInput";
+import { Camera, Upload, CheckCircle2, Mic, Sparkles, X, Loader2, Trash2, AlertTriangle, Languages, ImageIcon, Brain, Copy, Check, FileText } from "lucide-react";
 import { apiClient } from "../services/api";
 import { toast } from "sonner";
 import { PageHeader } from "./PageHeader";
@@ -82,11 +83,9 @@ export function FileGrievanceForm({ onSubmit, onCancel }: FileGrievanceFormProps
   // Form data
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [location, setLocation] = useState({ address: "", lat: 0, lng: 0 });
+  const [location, setLocation] = useState<{ address: string; lat?: number; lng?: number }>({ address: "" });
   const [files, setFiles] = useState<FilePreview[]>([]);
   const [uploadingFiles, setUploadingFiles] = useState(false);
-  const [detectingLocation, setDetectingLocation] = useState(false);
-  const [manualAddress, setManualAddress] = useState(false);
 
   // AI Analysis Results
   const [aiAnalysis, setAiAnalysis] = useState<AIAnalysisResult | null>(null);
@@ -99,95 +98,6 @@ export function FileGrievanceForm({ onSubmit, onCancel }: FileGrievanceFormProps
 
   // Voice recognition
   const recognitionRef = useRef<any>(null);
-
-  // Function to detect current location
-  const detectLocation = () => {
-    if (!navigator.geolocation) {
-      toast.error("Geolocation is not supported by your browser");
-      setManualAddress(true);
-      return;
-    }
-
-    setDetectingLocation(true);
-    setLocation({ address: "Detecting location...", lat: 0, lng: 0 });
-
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const { latitude, longitude } = position.coords;
-        setLocation({
-          address: "Fetching address...",
-          lat: latitude,
-          lng: longitude,
-        });
-
-        // Reverse geocode to get address using Nominatim
-        fetch(`https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&addressdetails=1`, {
-          headers: {
-            'Accept-Language': 'en',
-          }
-        })
-          .then(res => res.json())
-          .then(data => {
-            if (data.error) {
-              throw new Error(data.error);
-            }
-            // Build a readable address from components
-            const addr = data.address;
-            let addressParts = [];
-            if (addr.road || addr.street) addressParts.push(addr.road || addr.street);
-            if (addr.neighbourhood || addr.suburb) addressParts.push(addr.neighbourhood || addr.suburb);
-            if (addr.city || addr.town || addr.village) addressParts.push(addr.city || addr.town || addr.village);
-            if (addr.state) addressParts.push(addr.state);
-
-            const formattedAddress = addressParts.length > 0
-              ? addressParts.join(', ')
-              : data.display_name?.split(',').slice(0, 4).join(',') || "Location detected";
-
-            setLocation(prev => ({ ...prev, address: formattedAddress }));
-            toast.success("Location detected successfully");
-          })
-          .catch((err) => {
-            console.error('Geocoding error:', err);
-            setLocation(prev => ({ ...prev, address: `Lat: ${latitude.toFixed(4)}, Lng: ${longitude.toFixed(4)}` }));
-            toast.info("Coordinates captured. You can add address manually.");
-          })
-          .finally(() => {
-            setDetectingLocation(false);
-            setManualAddress(false);
-          });
-      },
-      (error) => {
-        setDetectingLocation(false);
-        let errorMessage = "Unable to detect location";
-
-        switch (error.code) {
-          case error.PERMISSION_DENIED:
-            errorMessage = "Location permission denied. Please enable it in your browser settings or enter address manually.";
-            break;
-          case error.POSITION_UNAVAILABLE:
-            errorMessage = "Location unavailable. Please enter address manually.";
-            break;
-          case error.TIMEOUT:
-            errorMessage = "Location request timed out. Please try again or enter manually.";
-            break;
-        }
-
-        toast.error(errorMessage);
-        setLocation({ address: "", lat: 0, lng: 0 });
-        setManualAddress(true);
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 0,
-      }
-    );
-  };
-
-  // Try to detect location on mount
-  useEffect(() => {
-    detectLocation();
-  }, []);
 
   // Initialize speech recognition
   useEffect(() => {
@@ -340,14 +250,7 @@ export function FileGrievanceForm({ onSubmit, onCancel }: FileGrievanceFormProps
   };
 
   return (
-    <div className="space-y-6" style={{ 
-      backgroundColor: "#ffffff", 
-      padding: "24px", 
-      borderRadius: "12px",
-      boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
-      margin: "-16px",
-      marginTop: "0"
-    }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
       <PageHeader
         title={step === 4 ? "Grievance Submitted" : "File a Grievance"}
         description={step === 4 ? "AI analysis complete." : `Step ${step} of 3`}
@@ -359,27 +262,38 @@ export function FileGrievanceForm({ onSubmit, onCancel }: FileGrievanceFormProps
         }
       >
         {step < 4 && (
-          <div className="flex items-center gap-2">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
             {[1, 2, 3].map((num) => (
-              <div key={num} className="flex items-center flex-1">
+              <div key={num} style={{ display: 'flex', alignItems: 'center', flex: 1 }}>
                 <div
-                  className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center flex-shrink-0 transition-all font-semibold ${
-                    step >= num
-                      ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20"
-                      : "bg-secondary text-muted-foreground"
-                  }`}
+                  style={{
+                    width: '48px',
+                    height: '48px',
+                    borderRadius: '12px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
+                    fontWeight: 600,
+                    backgroundColor: step >= num ? '#030213' : '#f3f4f6',
+                    color: step >= num ? '#ffffff' : '#6b7280',
+                  }}
                 >
                   {step > num ? (
-                    <CheckCircle2 className="w-5 h-5 sm:w-6 sm:h-6" />
+                    <CheckCircle2 className="w-6 h-6" />
                   ) : (
-                    <span className="text-sm sm:text-base">{num}</span>
+                    <span>{num}</span>
                   )}
                 </div>
                 {num < 3 && (
                   <div
-                    className={`h-1.5 flex-1 mx-3 rounded-full transition-all ${
-                      step > num ? "bg-primary/60" : "bg-border"
-                    }`}
+                    style={{
+                      height: '6px',
+                      flex: 1,
+                      margin: '0 12px',
+                      borderRadius: '9999px',
+                      backgroundColor: step > num ? 'rgba(3, 2, 19, 0.6)' : '#e5e7eb',
+                    }}
                   />
                 )}
               </div>
@@ -388,59 +302,60 @@ export function FileGrievanceForm({ onSubmit, onCancel }: FileGrievanceFormProps
         )}
       </PageHeader>
 
-      <form onSubmit={handleSubmit} className="space-y-5">
+      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
         {step === 1 && (
-          <Card className="p-4 sm:p-6 space-y-6" style={{ padding: "20px !important" }}>
-            <div>
-              <h2 className="text-lg font-semibold mb-1">Describe the Issue</h2>
-              <p className="text-sm text-muted-foreground">
-                Tell us what's wrong in your own words
-              </p>
-            </div>
+          <Card style={{ padding: '24px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+              <div>
+                <h2 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '4px' }}>Describe the Issue</h2>
+                <p style={{ fontSize: '14px', color: '#6b7280' }}>
+                  Tell us what's wrong in your own words
+                </p>
+              </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="title">Issue Title</Label>
-              <Input
-                id="title"
-                placeholder="e.g., Large pothole on Main Street"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                required
-              />
-            </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <Label htmlFor="title" style={{ fontSize: '14px', fontWeight: 500 }}>Issue Title</Label>
+                <Input
+                  id="title"
+                  placeholder="e.g., Large pothole on Main Street"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  required
+                />
+              </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
-              <Textarea
-                id="description"
-                placeholder="Provide details about the issue..."
-                rows={4}
-                className="bg-input-background border-border"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                required
-              />
-              <Button
-                type="button"
-                variant="outline"
-                className="w-full"
-                onClick={toggleRecording}
-              >
-                <Mic className={`w-4 h-4 mr-2 ${isRecording ? 'text-destructive animate-pulse' : ''}`} />
-                {isRecording ? 'Stop Recording' : 'Use Voice Input'}
-              </Button>
-            </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <Label htmlFor="description" style={{ fontSize: '14px', fontWeight: 500 }}>Description</Label>
+                <Textarea
+                  id="description"
+                  placeholder="Provide details about the issue..."
+                  rows={4}
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  required
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  style={{ width: '100%', marginTop: '8px' }}
+                  onClick={toggleRecording}
+                >
+                  <Mic className={`w-4 h-4 mr-2 ${isRecording ? 'text-destructive animate-pulse' : ''}`} />
+                  {isRecording ? 'Stop Recording' : 'Use Voice Input'}
+                </Button>
+              </div>
 
-            <div className="bg-accent/10 border border-accent/20 rounded-xl p-4">
-              <div className="flex items-start gap-3">
-                <div className="w-10 h-10 bg-accent/20 rounded-xl flex items-center justify-center flex-shrink-0">
-                  <Sparkles className="w-5 h-5 text-accent" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-accent">AI-Powered Categorization</p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    No need to select a category. Our AI will automatically route your issue.
-                  </p>
+              <div style={{ backgroundColor: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.2)', borderRadius: '12px', padding: '16px' }}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+                  <div style={{ width: '40px', height: '40px', backgroundColor: 'rgba(16, 185, 129, 0.2)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <Sparkles className="w-5 h-5" style={{ color: '#10b981' }} />
+                  </div>
+                  <div>
+                    <p style={{ fontSize: '14px', fontWeight: 500, color: '#10b981' }}>AI-Powered Categorization</p>
+                    <p style={{ fontSize: '12px', color: '#6b7280', marginTop: '4px' }}>
+                      No need to select a category. Our AI will automatically route your issue.
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -448,89 +363,27 @@ export function FileGrievanceForm({ onSubmit, onCancel }: FileGrievanceFormProps
         )}
 
         {step === 2 && (
-          <Card className="p-4 sm:p-6 space-y-6" style={{ padding: "20px !important" }}>
-            <div>
-              <h2 className="text-lg font-semibold mb-1">Add Location & Evidence</h2>
-              <p className="text-sm text-muted-foreground">
-                Help us identify the exact location
-              </p>
-            </div>
-
-            <div className="space-y-3">
-              <div className="bg-secondary/50 border border-border rounded-md p-4">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-primary/10 rounded-md flex items-center justify-center flex-shrink-0">
-                    {detectingLocation ? (
-                      <Loader2 className="w-6 h-6 text-primary animate-spin" />
-                    ) : (
-                      <MapPin className="w-6 h-6 text-primary" />
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-sm">
-                      {detectingLocation ? "Detecting Location..." : "Current Location"}
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-0.5 truncate">
-                      {location.address || "No location set"}
-                    </p>
-                    {location.lat !== 0 && location.lng !== 0 && (
-                      <p className="text-xs text-muted-foreground/70 mt-0.5">
-                        GPS: {location.lat.toFixed(4)}, {location.lng.toFixed(4)}
-                      </p>
-                    )}
-                  </div>
-                </div>
+          <Card style={{ padding: '24px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+              <div>
+                <h2 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '4px' }}>Add Location & Evidence</h2>
+                <p style={{ fontSize: '14px', color: '#6b7280' }}>
+                  Help us identify the exact location
+                </p>
               </div>
 
-              <div className="flex gap-3">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={detectLocation}
-                  disabled={detectingLocation}
-                  className="flex-1"
-                >
-                  {detectingLocation ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Detecting...
-                    </>
-                  ) : (
-                    <>
-                      <MapPin className="w-4 h-4 mr-2" />
-                      {location.lat ? 'Refresh Location' : 'Detect Location'}
-                    </>
-                  )}
-                </Button>
-                <Button
-                  type="button"
-                  variant={manualAddress ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setManualAddress(!manualAddress)}
-                  className="flex-1"
-                >
-                  Enter Manually
-                </Button>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <Label className="text-sm font-medium">Location</Label>
+                <LocationInput
+                  value={location}
+                  onChange={setLocation}
+                  placeholder="Enter full address (e.g., 123 Main Road, Sector 15, New Delhi)"
+                  showCoordinates={true}
+                />
               </div>
 
-              {manualAddress && (
-                <div className="space-y-2">
-                  <Label htmlFor="manual-address">Address</Label>
-                  <Textarea
-                    id="manual-address"
-                    placeholder="Enter full address (e.g., 123 Main Road, Sector 15, New Delhi)"
-                    rows={2}
-                    value={location.address}
-                    onChange={(e) => setLocation(prev => ({ ...prev, address: e.target.value }))}
-                    className="bg-input-background border-border"
-                  />
-                </div>
-              )}
-            </div>
-
-            <div className="space-y-3">
-              <Label>Upload Photos/Videos (max 5)</Label>
+              <div className="flex flex-col gap-3">
+                <Label className="text-sm font-medium">Upload Photos/Videos (max 5)</Label>
               {/* Hidden file inputs */}
               <input
                 type="file"
@@ -598,98 +451,101 @@ export function FileGrievanceForm({ onSubmit, onCancel }: FileGrievanceFormProps
               <p className="text-xs text-muted-foreground">
                 Photos help authorities understand and resolve the issue faster
               </p>
+              </div>
             </div>
           </Card>
         )}
 
         {step === 3 && (
-          <Card className="p-4 sm:p-6 space-y-6" style={{ padding: "20px !important" }}>
-            <div>
-              <h2 className="text-lg font-semibold mb-1">Verify & Submit</h2>
-              <p className="text-sm text-muted-foreground">
-                Review your grievance before submitting
-              </p>
-            </div>
-
-            <div className="space-y-4">
-              <div className="flex justify-between items-start gap-4 py-3 border-b border-border">
-                <span className="text-sm text-muted-foreground">Issue Title</span>
-                <span className="text-sm font-medium text-right">{title || "Not specified"}</span>
-              </div>
-              <div className="flex justify-between items-start gap-4 py-3 border-b border-border">
-                <span className="text-sm text-muted-foreground">Category</span>
-                <span className="text-sm font-medium text-primary">Auto-detected by AI</span>
-              </div>
-              <div className="flex justify-between items-start gap-4 py-3 border-b border-border">
-                <span className="text-sm text-muted-foreground">Location</span>
-                <span className="text-sm font-medium text-right">{location.address || "Not specified"}</span>
-              </div>
-              <div className="flex justify-between items-start gap-4 py-3 border-b border-border">
-                <span className="text-sm text-muted-foreground">Attachments</span>
-                <span className="text-sm font-medium">{files.length} file{files.length !== 1 ? 's' : ''}</span>
-              </div>
-              <div className="py-3">
-                <span className="text-sm text-muted-foreground block mb-2">Description</span>
-                <p className="text-sm leading-relaxed">
-                  {description || "No description provided"}
+          <Card style={{ padding: '24px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+              <div>
+                <h2 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '4px' }}>Verify & Submit</h2>
+                <p style={{ fontSize: '14px', color: '#6b7280' }}>
+                  Review your grievance before submitting
                 </p>
               </div>
-            </div>
 
-            {/* File Preview Thumbnails */}
-            {files.length > 0 && (
-              <div className="flex gap-2 overflow-x-auto pb-2">
-                {files.map((filePreview, index) => (
-                  <div key={index} className="w-16 h-16 flex-shrink-0 rounded-md overflow-hidden bg-secondary">
-                    {filePreview.file.type.startsWith('image/') ? (
-                      <img
-                        src={filePreview.preview}
-                        alt={`Attachment ${index + 1}`}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <video
-                        src={filePreview.preview}
-                        className="w-full h-full object-cover"
-                      />
-                    )}
-                  </div>
-                ))}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '16px', padding: '12px 0', borderBottom: '1px solid #e5e7eb' }}>
+                  <span style={{ fontSize: '14px', color: '#6b7280' }}>Issue Title</span>
+                  <span style={{ fontSize: '14px', fontWeight: 500, textAlign: 'right' }}>{title || "Not specified"}</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '16px', padding: '12px 0', borderBottom: '1px solid #e5e7eb' }}>
+                  <span style={{ fontSize: '14px', color: '#6b7280' }}>Category</span>
+                  <span style={{ fontSize: '14px', fontWeight: 500, color: '#030213' }}>Auto-detected by AI</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '16px', padding: '12px 0', borderBottom: '1px solid #e5e7eb' }}>
+                  <span style={{ fontSize: '14px', color: '#6b7280' }}>Location</span>
+                  <span style={{ fontSize: '14px', fontWeight: 500, textAlign: 'right' }}>{location.address || "Not specified"}</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '16px', padding: '12px 0', borderBottom: '1px solid #e5e7eb' }}>
+                  <span style={{ fontSize: '14px', color: '#6b7280' }}>Attachments</span>
+                  <span style={{ fontSize: '14px', fontWeight: 500 }}>{files.length} file{files.length !== 1 ? 's' : ''}</span>
+                </div>
+                <div style={{ padding: '12px 0' }}>
+                  <span style={{ fontSize: '14px', color: '#6b7280', display: 'block', marginBottom: '8px' }}>Description</span>
+                  <p style={{ fontSize: '14px', lineHeight: 1.625 }}>
+                    {description || "No description provided"}
+                  </p>
+                </div>
               </div>
-            )}
 
-            <div className="bg-secondary/60 border border-border rounded-xl p-4">
-              <p className="text-sm text-muted-foreground">
-                You'll receive updates via SMS and in-app notifications about your grievance progress.
-              </p>
+              {/* File Preview Thumbnails */}
+              {files.length > 0 && (
+                <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '8px' }}>
+                  {files.map((filePreview, index) => (
+                    <div key={index} style={{ width: '64px', height: '64px', flexShrink: 0, borderRadius: '8px', overflow: 'hidden', backgroundColor: '#f3f4f6' }}>
+                      {filePreview.file.type.startsWith('image/') ? (
+                        <img
+                          src={filePreview.preview}
+                          alt={`Attachment ${index + 1}`}
+                          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        />
+                      ) : (
+                        <video
+                          src={filePreview.preview}
+                          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        />
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <div style={{ backgroundColor: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: '12px', padding: '16px' }}>
+                <p style={{ fontSize: '14px', color: '#6b7280' }}>
+                  You'll receive updates via SMS and in-app notifications about your grievance progress.
+                </p>
+              </div>
             </div>
           </Card>
         )}
 
         {/* Step 4: AI Analysis Results */}
         {step === 4 && aiAnalysis && (
-          <div className="space-y-4">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             {/* Success Banner */}
-            <Card className="p-6 bg-success/10 border-success/20">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-success/20 rounded-full flex items-center justify-center">
-                  <CheckCircle2 className="w-6 h-6 text-success" />
+            <Card style={{ padding: '20px', backgroundColor: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                <div style={{ width: '48px', height: '48px', backgroundColor: 'rgba(16, 185, 129, 0.2)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <CheckCircle2 style={{ width: '24px', height: '24px', color: '#10b981' }} />
                 </div>
                 <div>
-                  <h2 className="text-lg font-semibold text-success">Grievance Registered</h2>
-                  <p className="text-sm text-muted-foreground">ID: {submittedGrievanceId}</p>
+                  <h2 style={{ fontSize: '18px', fontWeight: 600, color: '#10b981' }}>Grievance Registered</h2>
+                  <p style={{ fontSize: '14px', color: '#6b7280' }}>ID: {submittedGrievanceId}</p>
                 </div>
               </div>
             </Card>
 
             {/* Duplicate Warning */}
             {aiAnalysis.duplicates.isDuplicate && (
-              <Card className="p-4 bg-warning/10 border-warning/20">
-                <div className="flex items-start gap-3">
-                  <AlertTriangle className="w-5 h-5 text-warning flex-shrink-0 mt-0.5" />
+              <Card style={{ padding: '16px', backgroundColor: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.2)' }}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+                  <AlertTriangle style={{ width: '20px', height: '20px', color: '#f59e0b', flexShrink: 0, marginTop: '2px' }} />
                   <div>
-                    <p className="font-medium text-warning">Potential Duplicate Detected</p>
-                    <p className="text-sm text-muted-foreground mt-1">
+                    <p style={{ fontWeight: 500, color: '#f59e0b' }}>Potential Duplicate Detected</p>
+                    <p style={{ fontSize: '14px', color: '#6b7280', marginTop: '4px' }}>
                       Similar grievances have been found in your area. Your grievance has been linked for faster resolution.
                     </p>
                   </div>
@@ -699,22 +555,24 @@ export function FileGrievanceForm({ onSubmit, onCancel }: FileGrievanceFormProps
 
             {/* Similar Grievances */}
             {aiAnalysis.duplicates.similarCount > 0 && (
-              <Card className="p-4">
-                <div className="flex items-center gap-2 mb-3">
-                  <Brain className="w-4 h-4 text-muted-foreground" />
-                  <h3 className="font-medium text-sm text-foreground">Similar Issues ({aiAnalysis.duplicates.similarCount})</h3>
+              <Card style={{ padding: '16px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+                  <Brain style={{ width: '16px', height: '16px', color: '#6b7280' }} />
+                  <h3 style={{ fontWeight: 500, fontSize: '14px' }}>Similar Issues ({aiAnalysis.duplicates.similarCount})</h3>
                 </div>
-                <div className="space-y-2">
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   {aiAnalysis.duplicates.similarGrievances.slice(0, 3).map((g) => (
-                    <div key={g.id} className="flex items-center justify-between p-2 bg-secondary/70 rounded-lg">
-                      <span className="text-sm truncate flex-1 text-foreground">{g.title}</span>
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs text-muted-foreground">{g.similarity}% match</span>
-                        <span className={`text-xs px-2 py-0.5 rounded-full ${
-                          g.status === 'resolved' ? 'bg-success/10 text-success' :
-                          g.status === 'in_progress' ? 'bg-info/10 text-info' :
-                          'bg-warning/10 text-warning'
-                        }`}>{g.status}</span>
+                    <div key={g.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px', backgroundColor: '#f3f4f6', borderRadius: '8px' }}>
+                      <span style={{ fontSize: '14px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>{g.title}</span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ fontSize: '12px', color: '#6b7280' }}>{g.similarity}% match</span>
+                        <span style={{
+                          fontSize: '12px',
+                          padding: '2px 8px',
+                          borderRadius: '9999px',
+                          backgroundColor: g.status === 'resolved' ? 'rgba(16, 185, 129, 0.1)' : g.status === 'in_progress' ? 'rgba(59, 130, 246, 0.1)' : 'rgba(245, 158, 11, 0.1)',
+                          color: g.status === 'resolved' ? '#10b981' : g.status === 'in_progress' ? '#3b82f6' : '#f59e0b'
+                        }}>{g.status}</span>
                       </div>
                     </div>
                   ))}
@@ -723,51 +581,52 @@ export function FileGrievanceForm({ onSubmit, onCancel }: FileGrievanceFormProps
             )}
 
             {/* AI Categorization */}
-            <Card className="p-4">
-              <div className="flex items-center gap-2 mb-3">
-                <Sparkles className="w-4 h-4 text-accent" />
-                <h3 className="font-medium text-sm text-foreground">AI Categorization</h3>
+            <Card style={{ padding: '16px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+                <Sparkles style={{ width: '16px', height: '16px', color: '#10b981' }} />
+                <h3 style={{ fontWeight: 500, fontSize: '14px' }}>AI Categorization</h3>
               </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="p-3 bg-secondary/70 rounded-lg">
-                  <p className="text-xs text-muted-foreground">Category</p>
-                  <p className="font-medium text-sm text-foreground">{aiAnalysis.categorization.category}</p>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div style={{ padding: '12px', backgroundColor: '#f3f4f6', borderRadius: '8px' }}>
+                  <p style={{ fontSize: '12px', color: '#6b7280' }}>Category</p>
+                  <p style={{ fontWeight: 500, fontSize: '14px' }}>{aiAnalysis.categorization.category}</p>
                 </div>
-                <div className="p-3 bg-secondary/70 rounded-lg">
-                  <p className="text-xs text-muted-foreground">Department</p>
-                  <p className="font-medium text-sm text-foreground truncate">{aiAnalysis.categorization.department.split('(')[0].trim()}</p>
+                <div style={{ padding: '12px', backgroundColor: '#f3f4f6', borderRadius: '8px' }}>
+                  <p style={{ fontSize: '12px', color: '#6b7280' }}>Department</p>
+                  <p style={{ fontWeight: 500, fontSize: '14px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{aiAnalysis.categorization.department.split('(')[0].trim()}</p>
                 </div>
-                <div className="p-3 bg-secondary/70 rounded-lg">
-                  <p className="text-xs text-muted-foreground">Severity</p>
-                  <div className="flex items-center gap-2">
-                    <div className="flex-1 h-2 bg-secondary rounded-full overflow-hidden">
+                <div style={{ padding: '12px', backgroundColor: '#f3f4f6', borderRadius: '8px' }}>
+                  <p style={{ fontSize: '12px', color: '#6b7280' }}>Severity</p>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div style={{ flex: 1, height: '8px', backgroundColor: '#e5e7eb', borderRadius: '9999px', overflow: 'hidden' }}>
                       <div
-                        className={`h-full rounded-full ${
-                          aiAnalysis.categorization.severity >= 7 ? 'bg-destructive' :
-                          aiAnalysis.categorization.severity >= 4 ? 'bg-warning' : 'bg-success'
-                        }`}
-                        style={{ width: `${aiAnalysis.categorization.severity * 10}%` }}
+                        style={{
+                          height: '100%',
+                          borderRadius: '9999px',
+                          width: `${aiAnalysis.categorization.severity * 10}%`,
+                          backgroundColor: aiAnalysis.categorization.severity >= 7 ? '#ef4444' : aiAnalysis.categorization.severity >= 4 ? '#f59e0b' : '#10b981'
+                        }}
                       />
                     </div>
-                    <span className="text-sm font-medium text-foreground">{aiAnalysis.categorization.severity}/10</span>
+                    <span style={{ fontSize: '14px', fontWeight: 500 }}>{aiAnalysis.categorization.severity}/10</span>
                   </div>
                 </div>
-                <div className="p-3 bg-secondary/70 rounded-lg">
-                  <p className="text-xs text-muted-foreground">Priority Score</p>
-                  <p className="font-medium text-sm text-foreground">{aiAnalysis.categorization.priorityScore}/100</p>
+                <div style={{ padding: '12px', backgroundColor: '#f3f4f6', borderRadius: '8px' }}>
+                  <p style={{ fontSize: '12px', color: '#6b7280' }}>Priority Score</p>
+                  <p style={{ fontWeight: 500, fontSize: '14px' }}>{aiAnalysis.categorization.priorityScore}/100</p>
                 </div>
               </div>
             </Card>
 
             {/* Language Detection */}
             {aiAnalysis.translation.wasTranslated && (
-              <Card className="p-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <Languages className="w-4 h-4 text-info" />
-                  <h3 className="font-medium text-sm">Language Detected</h3>
+              <Card style={{ padding: '16px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                  <Languages style={{ width: '16px', height: '16px', color: '#3b82f6' }} />
+                  <h3 style={{ fontWeight: 500, fontSize: '14px' }}>Language Detected</h3>
                 </div>
-                <p className="text-sm text-muted-foreground">
-                  Your grievance was written in <span className="font-medium text-foreground">
+                <p style={{ fontSize: '14px', color: '#6b7280' }}>
+                  Your grievance was written in <span style={{ fontWeight: 500, color: '#111827' }}>
                     {LANGUAGE_NAMES[aiAnalysis.translation.detectedLanguage] || aiAnalysis.translation.detectedLanguage}
                   </span> and has been translated for processing.
                 </p>
@@ -776,21 +635,21 @@ export function FileGrievanceForm({ onSubmit, onCancel }: FileGrievanceFormProps
 
             {/* Image Analysis */}
             {aiAnalysis.imageAnalysis && aiAnalysis.imageAnalysis.confidence > 0 && (
-              <Card className="p-4">
-                <div className="flex items-center gap-2 mb-3">
-                  <ImageIcon className="w-4 h-4 text-primary" />
-                  <h3 className="font-medium text-sm">Image Analysis</h3>
-                  <span className="text-xs text-muted-foreground ml-auto">
+              <Card style={{ padding: '16px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+                  <ImageIcon style={{ width: '16px', height: '16px', color: '#030213' }} />
+                  <h3 style={{ fontWeight: 500, fontSize: '14px' }}>Image Analysis</h3>
+                  <span style={{ fontSize: '12px', color: '#6b7280', marginLeft: 'auto' }}>
                     {aiAnalysis.imageAnalysis.confidence}% confidence
                   </span>
                 </div>
-                <p className="text-sm text-muted-foreground mb-2">
+                <p style={{ fontSize: '14px', color: '#6b7280', marginBottom: '8px' }}>
                   {aiAnalysis.imageAnalysis.description}
                 </p>
                 {aiAnalysis.imageAnalysis.detectedIssues.length > 0 && (
-                  <div className="flex flex-wrap gap-1">
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
                     {aiAnalysis.imageAnalysis.detectedIssues.map((issue, i) => (
-                      <span key={i} className="text-xs px-2 py-1 bg-secondary rounded-full">
+                      <span key={i} style={{ fontSize: '12px', padding: '4px 8px', backgroundColor: '#f3f4f6', borderRadius: '9999px' }}>
                         {issue}
                       </span>
                     ))}
@@ -800,9 +659,9 @@ export function FileGrievanceForm({ onSubmit, onCancel }: FileGrievanceFormProps
             )}
 
             {/* Auto Response / Acknowledgment */}
-            <Card className="p-4">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="font-medium text-sm">Official Acknowledgment</h3>
+            <Card style={{ padding: '16px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+                <h3 style={{ fontWeight: 500, fontSize: '14px' }}>Official Acknowledgment</h3>
                 <Button
                   type="button"
                   variant="ghost"
@@ -812,45 +671,56 @@ export function FileGrievanceForm({ onSubmit, onCancel }: FileGrievanceFormProps
                   {copiedAck ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
                 </Button>
               </div>
-              <div className="bg-secondary/50 rounded-md p-3 text-sm whitespace-pre-wrap max-h-48 overflow-y-auto">
+              <div style={{ backgroundColor: '#f9fafb', borderRadius: '8px', padding: '12px', fontSize: '14px', whiteSpace: 'pre-wrap', maxHeight: '192px', overflowY: 'auto' }}>
                 {aiAnalysis.autoResponse.acknowledgment}
               </div>
-              <div className="mt-3 flex items-center gap-2 text-sm">
-                <span className="text-muted-foreground">Expected Resolution:</span>
-                <span className="font-medium text-primary">
+              <div style={{ marginTop: '12px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px' }}>
+                <span style={{ color: '#6b7280' }}>Expected Resolution:</span>
+                <span style={{ fontWeight: 500, color: '#030213' }}>
                   {aiAnalysis.autoResponse.expectedResolutionDays} days
                 </span>
               </div>
             </Card>
 
             {/* Next Steps */}
-            <Card className="p-4">
-              <h3 className="font-medium text-sm mb-3">Next Steps</h3>
-              <ul className="space-y-2">
-                {aiAnalysis.autoResponse.nextSteps.map((step, i) => (
-                  <li key={i} className="flex items-start gap-2 text-sm">
-                    <div className="w-5 h-5 bg-primary/20 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <span className="text-xs font-medium text-primary">{i + 1}</span>
+            <Card style={{ padding: '16px' }}>
+              <h3 style={{ fontWeight: 500, fontSize: '14px', marginBottom: '12px' }}>Next Steps</h3>
+              <ul style={{ display: 'flex', flexDirection: 'column', gap: '8px', listStyle: 'none', padding: 0, margin: 0 }}>
+                {aiAnalysis.autoResponse.nextSteps.map((s, i) => (
+                  <li key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', fontSize: '14px' }}>
+                    <div style={{ width: '20px', height: '20px', backgroundColor: 'rgba(3, 2, 19, 0.1)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: '2px' }}>
+                      <span style={{ fontSize: '12px', fontWeight: 500, color: '#030213' }}>{i + 1}</span>
                     </div>
-                    <span className="text-muted-foreground">{step}</span>
+                    <span style={{ color: '#6b7280' }}>{s}</span>
                   </li>
                 ))}
               </ul>
             </Card>
 
             {/* Blockchain Verification */}
-            <Card className="p-4 bg-info/10 border-info/20">
-              <div className="flex items-center gap-2 mb-2">
-                <Brain className="w-4 h-4 text-info" />
-                <h3 className="font-medium text-sm text-info">Blockchain Verified</h3>
+            <Card style={{ padding: '16px', backgroundColor: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.2)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                <Brain style={{ width: '16px', height: '16px', color: '#3b82f6' }} />
+                <h3 style={{ fontWeight: 500, fontSize: '14px', color: '#3b82f6' }}>Blockchain Verified</h3>
               </div>
-              <p className="text-xs text-muted-foreground font-mono break-all">
+              <p style={{ fontSize: '12px', color: '#6b7280', fontFamily: 'monospace', wordBreak: 'break-all' }}>
                 AI Analysis Hash: {aiAnalysis.aiAnalysisHash.slice(0, 16)}...{aiAnalysis.aiAnalysisHash.slice(-16)}
               </p>
             </Card>
 
             {/* Done Button */}
-            <Button onClick={onSubmit} className="w-full">
+            <Button
+              onClick={onSubmit}
+              style={{
+                width: '100%',
+                backgroundColor: '#030213',
+                color: '#ffffff',
+                padding: '12px 24px',
+                fontWeight: 500,
+                borderRadius: '8px',
+                marginBottom: '24px'
+              }}
+            >
               Done
             </Button>
           </div>
@@ -858,13 +728,13 @@ export function FileGrievanceForm({ onSubmit, onCancel }: FileGrievanceFormProps
 
         {/* Navigation Buttons (hidden on step 4) */}
         {step < 4 && (
-          <div className="flex gap-3">
+          <div style={{ display: 'flex', gap: '12px', marginBottom: '24px', marginTop: '8px' }}>
             {step > 1 && (
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => setStep(step - 1)}
-                className="flex-1 sm:flex-none"
+                style={{ flex: 1 }}
                 disabled={isSubmitting}
               >
                 Back
@@ -874,13 +744,31 @@ export function FileGrievanceForm({ onSubmit, onCancel }: FileGrievanceFormProps
               <Button
                 type="button"
                 onClick={() => setStep(step + 1)}
-                className="flex-1"
+                style={{
+                  flex: 1,
+                  backgroundColor: '#030213',
+                  color: '#ffffff',
+                  padding: '12px 24px',
+                  fontWeight: 500,
+                  borderRadius: '8px',
+                }}
                 disabled={step === 1 && (!title.trim() || !description.trim())}
               >
                 Continue
               </Button>
             ) : (
-              <Button type="submit" className="flex-1" disabled={isSubmitting}>
+              <Button
+                type="submit"
+                style={{
+                  flex: 1,
+                  backgroundColor: '#030213',
+                  color: '#ffffff',
+                  padding: '12px 24px',
+                  fontWeight: 500,
+                  borderRadius: '8px',
+                }}
+                disabled={isSubmitting}
+              >
                 {isSubmitting ? (
                   <>
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -894,6 +782,6 @@ export function FileGrievanceForm({ onSubmit, onCancel }: FileGrievanceFormProps
           </div>
         )}
       </form>
-      </div>
+    </div>
   );
 }

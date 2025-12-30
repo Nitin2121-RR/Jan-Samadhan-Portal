@@ -13,7 +13,7 @@ function Input({ className, type, error, ...props }: InputProps) {
       data-slot="input"
       className={cn(
         // Base styles
-        "flex h-11 w-full min-w-0 rounded-lg border bg-input-background px-4 py-2.5 text-base text-foreground transition-all duration-200",
+        "flex h-11 w-full min-w-0 rounded-lg px-4 py-2.5 text-base text-foreground transition-all duration-200",
         // Placeholder
         "placeholder:text-muted-foreground/70",
         // File input
@@ -21,17 +21,17 @@ function Input({ className, type, error, ...props }: InputProps) {
         // Selection
         "selection:bg-primary selection:text-primary-foreground",
         // Focus state
-        "focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary focus:bg-background",
+        "focus:outline-none focus:ring-2 focus:ring-primary/40 focus:bg-white",
         // Disabled state
         "disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50",
-        // Error state
-        error && "border-destructive focus:ring-destructive/40 focus:border-destructive",
-        // Default border
-        !error && "border-border hover:border-muted-foreground/40",
         // Responsive
         "md:text-sm",
         className,
       )}
+      style={{
+        backgroundColor: '#f5f5f7',
+        border: error ? '1px solid #d4183d' : '1px solid #d1d5db',
+      }}
       {...props}
     />
   );

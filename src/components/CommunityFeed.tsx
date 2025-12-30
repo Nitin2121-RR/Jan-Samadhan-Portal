@@ -153,13 +153,13 @@ export function CommunityFeed() {
   }
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
       {/* Header */}
       <div
         style={{
           backgroundColor: "#ffffff",
           borderRadius: "16px",
-          padding: "20px",
+          padding: "24px",
           border: "1px solid #e5e7eb",
           display: "flex",
           alignItems: "center",
@@ -209,7 +209,7 @@ export function CommunityFeed() {
         style={{
           backgroundColor: "#ffffff",
           borderRadius: "16px",
-          padding: "24px",
+          padding: "20px",
           border: "1px solid #e5e7eb",
           display: "flex",
           alignItems: "center",

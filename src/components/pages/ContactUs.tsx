@@ -27,18 +27,7 @@ export function ContactUs({ onBack }: ContactUsProps) {
           </p>
         </div>
 
-        <div className="space-y-6 contact-us-container">
-          <style>{`
-            .contact-us-container {
-              padding: 16px !important;
-              box-sizing: border-box !important;
-            }
-            @media (min-width: 640px) {
-              .contact-us-container {
-                padding: 24px !important;
-              }
-            }
-          `}</style>
+        <div className="space-y-6">
           {/* Contact Methods */}
           <div className="grid gap-4 sm:grid-cols-2">
             <Card className="p-6">

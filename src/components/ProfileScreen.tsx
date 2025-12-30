@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { User, Bell, Shield, HelpCircle, LogOut, ChevronRight, Award, TrendingUp } from "lucide-react";
+import { LocationInput } from "./ui/LocationInput";
 import { apiClient } from "../services/api";
 import { toast } from "sonner";
 
@@ -116,9 +117,9 @@ export function ProfileScreen({ userName, userEmail, onLogout, onNavigate }: Pro
   }
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
       {/* Header */}
-      <div style={{ backgroundColor: "#ffffff", borderRadius: "16px", padding: "20px", border: "1px solid #e5e7eb", display: "flex", alignItems: "center", gap: "16px" }}>
+      <div style={{ backgroundColor: "#ffffff", borderRadius: "16px", padding: "24px", border: "1px solid #e5e7eb", display: "flex", alignItems: "center", gap: "16px" }}>
         <div style={{ width: "48px", height: "48px", backgroundColor: "#f1f5f9", borderRadius: "14px", display: "flex", alignItems: "center", justifyContent: "center" }}>
           <User style={{ width: "24px", height: "24px", color: "#64748b" }} />
         </div>
@@ -143,7 +144,7 @@ export function ProfileScreen({ userName, userEmail, onLogout, onNavigate }: Pro
       {/* Contribution Stats */}
       <div style={{ backgroundColor: "#ffffff", borderRadius: "16px", padding: "24px", border: "1px solid #e5e7eb" }}>
         <h3 style={{ fontSize: "16px", fontWeight: 600, color: "#111827", margin: "0 0 16px 0" }}>Your Contribution</h3>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "16px" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "12px" }}>
           <div style={{ backgroundColor: "#f3f4f6", borderRadius: "12px", padding: "20px", textAlign: "center", border: "1px solid #e5e7eb" }}>
             <p style={{ fontSize: "28px", fontWeight: 700, color: "#111827", margin: 0 }}>{stats.reported}</p>
             <p style={{ fontSize: "12px", color: "#6b7280", margin: "4px 0 0 0" }}>Reported</p>
@@ -350,7 +351,11 @@ export function ProfileScreen({ userName, userEmail, onLogout, onNavigate }: Pro
               </div>
               <div>
                 <label style={{ display: "block", fontSize: "14px", fontWeight: 500, color: "#374151", marginBottom: "6px" }}>Address</label>
-                <textarea value={editForm.address} onChange={(e) => setEditForm(prev => ({ ...prev, address: e.target.value }))} style={{ ...inputStyle, minHeight: "80px", resize: "vertical" }} placeholder="Enter your address" />
+                <LocationInput
+                  value={{ address: editForm.address }}
+                  onChange={(loc) => setEditForm(prev => ({ ...prev, address: loc.address }))}
+                  placeholder="Enter your address"
+                />
               </div>
               <div>
                 <label style={{ display: "block", fontSize: "14px", fontWeight: 500, color: "#374151", marginBottom: "6px" }}>New Password (optional)</label>

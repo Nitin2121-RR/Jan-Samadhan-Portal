@@ -310,7 +310,7 @@ export default function App() {
           </header>
 
           {/* Main Content */}
-          <main style={{ flex: 1, overflow: "auto", padding: "16px" }}>
+          <main style={{ flex: 1, overflow: "auto", padding: "24px" }}>
             <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
               {userRole === "authority" ? (
                 <Suspense fallback={<LoadingSpinner />}>
@@ -402,14 +402,9 @@ export default function App() {
           .app-desktop-welcome { display: flex !important; }
           .app-mobile-action { display: none !important; }
           .app-mobile-nav { display: none !important; }
-          main { padding: 24px !important; }
         }
         @media (max-width: 1023px) {
           .app-desktop-welcome { display: none !important; }
-          main { padding: 16px !important; }
-        }
-        @media (max-width: 640px) {
-          main { padding: 12px !important; }
         }
       `}</style>
     </div>

@@ -30,11 +30,6 @@
   --safe-bottom: env(safe-area-inset-bottom, 0px);
   --nav-height: 4.5rem; /* 72px */
 
-  /* Responsive spacing */
-  --content-padding: 16px;
-  --card-padding: 20px;
-  --section-gap: 20px;
-
   /* Monochrome palette - Light */
   --background: #ffffff;
   --foreground: #0f172a;
@@ -431,66 +426,4 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
-}
-/* Responsive spacing utilities */
-@media (min-width: 640px) {
-  :root {
-    --content-padding: 20px;
-    --card-padding: 24px;
-    --section-gap: 24px;
-  }
-}
-
-@media (min-width: 1024px) {
-  :root {
-    --content-padding: 24px;
-    --card-padding: 24px;
-    --section-gap: 24px;
-  }
-}
-
-/* Responsive padding utilities */
-.responsive-padding {
-  padding: var(--content-padding);
-}
-
-.responsive-card-padding {
-  padding: var(--card-padding);
-}
-
-.responsive-gap {
-  gap: var(--section-gap);
-}
-
-/* Mobile-first spacing */
-@media (max-width: 639px) {
-  .mobile-tight {
-    padding: 12px !important;
-    gap: 16px !important;
-  }
-  
-  .mobile-card {
-    padding: 16px !important;
-  }
-}
-/* Component container spacing fix */
-.component-container {
-  padding: 16px;
-}
-
-@media (min-width: 640px) {
-  .component-container {
-    padding: 20px;
-  }
-}
-
-@media (min-width: 1024px) {
-  .component-container {
-    padding: 24px;
-  }
-}
-
-/* Ensure all main content areas have proper spacing */
-main > div {
-  min-height: 0; /* Prevent flex issues */
 }

@@ -27,18 +27,7 @@ export function TermsOfService({ onBack }: TermsOfServiceProps) {
           </p>
         </div>
 
-        <div className="space-y-6 terms-of-service-container">
-          <style>{`
-            .terms-of-service-container {
-              padding: 16px !important;
-              box-sizing: border-box !important;
-            }
-            @media (min-width: 640px) {
-              .terms-of-service-container {
-                padding: 24px !important;
-              }
-            }
-          `}</style>
+        <div className="space-y-6">
           <Card className="p-6">
             <div className="flex items-start gap-4">
               <div className="w-10 h-10 bg-primary/10 rounded-md flex items-center justify-center flex-shrink-0">

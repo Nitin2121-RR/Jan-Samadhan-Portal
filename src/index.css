@@ -2,8 +2,6 @@
 @import './styles/accessibility.css';
 @import './styles/responsive.css';
 @import './styles/utility-overrides.css';
-@import './styles/spacing.css';
-@import './styles/force-padding.css';
 @layer properties {
   @supports (((-webkit-hyphens: none)) and (not (margin-trim: inline))) or ((-moz-orient: inline) and (not (color: rgb(from red r g b)))) {
     *, :before, :after, ::backdrop {

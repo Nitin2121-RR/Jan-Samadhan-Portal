@@ -143,13 +143,13 @@ export function MyGrievances() {
   }
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
       {/* Header */}
       <div
         style={{
           backgroundColor: "#ffffff",
           borderRadius: "16px",
-          padding: "20px",
+          padding: "24px",
           border: "1px solid #e5e7eb",
           display: "flex",
           alignItems: "center",
@@ -204,7 +204,7 @@ export function MyGrievances() {
               style={{
                 backgroundColor: "#ffffff",
                 borderRadius: "12px",
-                padding: "24px",
+                padding: "20px",
                 border: "1px solid #e5e7eb",
                 display: "flex",
                 alignItems: "center",
@@ -238,7 +238,7 @@ export function MyGrievances() {
         style={{
           backgroundColor: "#f3f4f6",
           borderRadius: "12px",
-          padding: "8px",
+          padding: "4px",
           display: "grid",
           gridTemplateColumns: "repeat(3, 1fr)",
           gap: "4px",
