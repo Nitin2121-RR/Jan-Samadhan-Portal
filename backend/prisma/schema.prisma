@@ -1,4 +1,3 @@
-// PostgreSQL version for production deployment
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
@@ -44,6 +43,9 @@ model Department {
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  @@index([category])
+  @@index([code])
 }
 
 model User {
@@ -79,6 +81,9 @@ model User {
   
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([email])
+  @@index([role])
 }
 
 model Grievance {
@@ -99,7 +104,7 @@ model Grievance {
   address       String?
   ward          String?
 
-  // AI Features - PostgreSQL supports arrays and JSON
+  // AI Features
   embedding         Float[]       // Vector embedding for duplicate detection
   detectedLanguage  String?       // Original language detected (e.g., "hi", "en", "ta")
   translatedTitle   String?       // English translation if original was in another language
@@ -122,6 +127,9 @@ model Grievance {
   updates       GrievanceUpdate[]
 
   isEscalated   Boolean         @default(false)
+  escalatedAt   DateTime?
+  estimatedResolutionDate DateTime?
+  expectedResolutionDays Int?
 
   // Blockchain fields
   blockchainHash String? @unique
@@ -131,18 +139,29 @@ model Grievance {
   createdAt     DateTime        @default(now())
   updatedAt     DateTime        @updatedAt
   resolvedAt    DateTime?
+
+  @@index([userId])
+  @@index([status])
+  @@index([category])
+  @@index([priorityScore])
+  @@index([createdAt])
+  @@index([departmentId])
+  @@index([detectedLanguage])
 }
 
 model GrievanceFile {
-  id          String    @id @default(uuid())
-  grievanceId String?
-  grievance   Grievance? @relation(fields: [grievanceId], references: [id], onDelete: Cascade)
-  filename    String
-  filepath    String
-  mimetype    String
-  size        Int
+  id                 String    @id @default(uuid())
+  grievanceId        String?
+  grievance          Grievance? @relation(fields: [grievanceId], references: [id], onDelete: Cascade)
+  filename           String
+  filepath           String
+  mimetype           String
+  size               Int
+  cloudinaryPublicId String?
 
   createdAt   DateTime  @default(now())
+
+  @@index([grievanceId])
 }
 
 model GrievanceUpdate {
@@ -158,6 +177,9 @@ model GrievanceUpdate {
   blockchainTxHash String?
   
   createdAt   DateTime        @default(now())
+
+  @@index([grievanceId])
+  @@index([userId])
 }
 
 model Upvote {
@@ -170,6 +192,8 @@ model Upvote {
   createdAt   DateTime  @default(now())
 
   @@unique([grievanceId, userId])
+  @@index([grievanceId])
+  @@index([userId])
 }
 
 model Notification {
@@ -181,4 +205,8 @@ model Notification {
   read      Boolean  @default(false)
   
   createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([read])
 }
+

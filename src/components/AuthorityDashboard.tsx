@@ -66,6 +66,8 @@ interface Grievance {
   verifiedOnChain?: boolean;
   blockchainTxHash?: string | null;
   priorityBreakdown?: PriorityBreakdown;
+  expectedResolutionDays?: number;
+  estimatedResolutionDate?: string;
   latitude?: number;
   longitude?: number;
 }
@@ -153,6 +155,8 @@ export function AuthorityDashboard() {
           verifiedOnChain: g.verifiedOnChain,
           blockchainTxHash: g.blockchainTxHash,
           priorityBreakdown: g.priorityBreakdown,
+          expectedResolutionDays: g.expectedResolutionDays,
+          estimatedResolutionDate: g.estimatedResolutionDate,
           latitude: coords[0],
           longitude: coords[1],
         };
@@ -191,6 +195,34 @@ export function AuthorityDashboard() {
       ));
     } catch (err) {
       toast.error("Failed to acknowledge grievance");
+    }
+  };
+
+  const handleStartProgress = async (id: string) => {
+    try {
+      await apiClient.updateGrievanceStatus(id, "in_progress", "Work has started on this grievance");
+      toast.success("Grievance in progress", {
+        description: "Status updated to In Progress"
+      });
+      setGrievances(prev => prev.map(g =>
+        g.id === id ? { ...g, status: "in-progress" as const } : g
+      ));
+    } catch (err) {
+      toast.error("Failed to update status");
+    }
+  };
+
+  const handleResolve = async (id: string) => {
+    try {
+      await apiClient.updateGrievanceStatus(id, "resolved", "Grievance has been resolved");
+      toast.success("Grievance resolved", {
+        description: "The issue has been marked as resolved"
+      });
+      setGrievances(prev => prev.map(g =>
+        g.id === id ? { ...g, status: "resolved" as const } : g
+      ));
+    } catch (err) {
+      toast.error("Failed to resolve grievance");
     }
   };
 
@@ -425,6 +457,8 @@ export function AuthorityDashboard() {
             key={grievance.id}
             {...grievance}
             onAcknowledge={() => handleAcknowledge(grievance.id)}
+            onStartProgress={() => handleStartProgress(grievance.id)}
+            onResolve={() => handleResolve(grievance.id)}
           />
         ))}
         {activeTab === "timeline" && filteredGrievances
@@ -440,6 +474,8 @@ export function AuthorityDashboard() {
               key={grievance.id}
               {...grievance}
               onAcknowledge={() => handleAcknowledge(grievance.id)}
+              onStartProgress={() => handleStartProgress(grievance.id)}
+              onResolve={() => handleResolve(grievance.id)}
             />
           ))}
       </div>

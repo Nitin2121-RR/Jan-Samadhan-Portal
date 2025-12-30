@@ -66,6 +66,7 @@ interface CategorizeResult {
   departmentId: string | null;
   priorityScore: number;
   severity: number;
+  expectedResolutionDays: number;
 }
 
 interface TranslationResult {
@@ -172,15 +173,12 @@ class AIService {
 
     const whereClause: any = {
       createdAt: { gte: thirtyDaysAgo },
-      embedding: { isEmpty: false },
       status: { not: 'resolved' },
+      NOT: { embedding: { equals: [] } },
     };
 
-    // If location is provided, filter by nearby area (roughly 5km radius)
-    if (location?.lat && location?.lng) {
-      whereClause.latitude = { gte: location.lat - 0.045, lte: location.lat + 0.045 };
-      whereClause.longitude = { gte: location.lng - 0.045, lte: location.lng + 0.045 };
-    }
+    // Note: Location filtering is done in the comparison loop below
+    // to properly handle cases where one grievance has location and other doesn't
 
     const existingGrievances = await prisma.grievance.findMany({
       where: whereClause,
@@ -190,30 +188,47 @@ class AIService {
         embedding: true,
         status: true,
         category: true,
+        latitude: true,
+        longitude: true,
       },
       take: 100,
     });
+
+    console.log(`Duplicate detection: Found ${existingGrievances.length} grievances to compare against`);
 
     const similarGrievances: Array<{
       id: string;
       title: string;
       similarity: number;
       status: string;
+      isNearby?: boolean;
     }> = [];
 
     for (const grievance of existingGrievances) {
       if (grievance.embedding && grievance.embedding.length > 0) {
-        // Ensure embedding is treated as number array
-        const embeddingArray = Array.isArray(grievance.embedding) 
-          ? grievance.embedding 
-          : JSON.parse(grievance.embedding as string);
-        const similarity = this.cosineSimilarity(newEmbedding, embeddingArray);
-        if (similarity > 0.75) { // 75% similarity threshold
+        const similarity = this.cosineSimilarity(newEmbedding, grievance.embedding);
+
+        // Check if locations are nearby (within ~5km) - only compare if both have locations
+        let isNearby = false;
+        if (location?.lat && location?.lng && grievance.latitude && grievance.longitude) {
+          const latDiff = Math.abs(location.lat - grievance.latitude);
+          const lngDiff = Math.abs(location.lng - grievance.longitude);
+          isNearby = latDiff < 0.045 && lngDiff < 0.045; // ~5km radius
+        }
+
+        console.log(`Comparing with "${grievance.title}": ${Math.round(similarity * 100)}% similarity, nearby: ${isNearby}`);
+
+        // Only consider similar if text is similar AND location is nearby (or no location data)
+        const hasLocationData = location?.lat && location?.lng;
+        const shouldCompare = !hasLocationData || isNearby;
+
+        if (similarity > 0.75 && shouldCompare) { // 75% similarity threshold
           similarGrievances.push({
             id: grievance.id,
             title: grievance.title,
             similarity: Math.round(similarity * 100),
             status: grievance.status,
+            isNearby,
           });
         }
       }
@@ -226,6 +241,11 @@ class AIService {
     const duplicateOf = similarGrievances.length > 0 && similarGrievances[0].similarity > 90
       ? similarGrievances[0].id
       : null;
+
+    console.log(`Duplicate detection result: ${similarGrievances.length} similar, isDuplicate: ${duplicateOf !== null}`);
+    if (similarGrievances.length > 0) {
+      console.log(`Top similar: "${similarGrievances[0].title}" at ${similarGrievances[0].similarity}%`);
+    }
 
     return {
       isDuplicate: duplicateOf !== null,
@@ -610,6 +630,7 @@ Analyze and respond with ONLY a JSON object (no markdown, no explanation):
           departmentId: deptRecord?.id || null,
           priorityScore: Math.min(100, Math.max(0, parsed.priorityScore || 50)),
           severity: Math.min(10, Math.max(1, parsed.severity || 5)),
+          expectedResolutionDays: RESOLUTION_TIMES[category] || 15,
         };
       }
 
@@ -730,7 +751,14 @@ Analyze and respond with ONLY a JSON object (no markdown, no explanation):
       select: { id: true },
     });
 
-    return { category, department, departmentId: deptRecord?.id || null, priorityScore, severity };
+    return {
+      category,
+      department,
+      departmentId: deptRecord?.id || null,
+      priorityScore,
+      severity,
+      expectedResolutionDays: RESOLUTION_TIMES[category] || 15,
+    };
   }
 
   // ============================================================

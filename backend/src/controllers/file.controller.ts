@@ -7,19 +7,26 @@ import { AppError } from '../middleware/errorHandler';
 import { AuthRequest } from '../middleware/auth';
 import config from '../config/env';
 import { ensureUploadDir, validateFile, deleteFile } from '../services/file.service';
+import {
+  isCloudinaryConfigured,
+  uploadToCloudinary,
+  deleteFromCloudinary,
+} from '../services/cloudinary.service';
 
-// Configure multer storage
-const storage = multer.diskStorage({
-  destination: async (req, file, cb) => {
-    await ensureUploadDir();
-    cb(null, config.upload.uploadDir);
-  },
-  filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname);
-    const filename = `${uuidv4()}${ext}`;
-    cb(null, filename);
-  },
-});
+// Use memory storage for Cloudinary, disk storage for local
+const storage = isCloudinaryConfigured()
+  ? multer.memoryStorage()
+  : multer.diskStorage({
+      destination: async (req, file, cb) => {
+        await ensureUploadDir();
+        cb(null, config.upload.uploadDir);
+      },
+      filename: (req, file, cb) => {
+        const ext = path.extname(file.originalname);
+        const filename = `${uuidv4()}${ext}`;
+        cb(null, filename);
+      },
+    });
 
 // Configure multer
 export const upload = multer({
@@ -46,13 +53,27 @@ export const uploadFile = async (req: AuthRequest, res: Response): Promise<void>
     throw new AppError('No file uploaded', 400);
   }
 
-  // Create a temporary file record if no grievanceId provided
-  // The grievanceId can be updated later when the grievance is created
+  let filepath: string;
+  let cloudinaryPublicId: string | null = null;
+
+  // Upload to Cloudinary if configured, otherwise use local storage
+  if (isCloudinaryConfigured() && req.file.buffer) {
+    const resourceType = req.file.mimetype.startsWith('video/') ? 'video' : 'image';
+    const result = await uploadToCloudinary(req.file.buffer, { resourceType });
+    filepath = result.url;
+    cloudinaryPublicId = result.publicId;
+  } else {
+    // Local storage - file already saved by multer diskStorage
+    filepath = `/files/${req.file.filename}`;
+  }
+
+  // Create file record
   const fileData: any = {
     filename: req.file.originalname,
-    filepath: `/files/${req.file.filename}`,
+    filepath,
     mimetype: req.file.mimetype,
     size: req.file.size,
+    cloudinaryPublicId,
   };
 
   if (req.body.grievanceId) {
@@ -85,6 +106,13 @@ export const getFile = async (req: Request, res: Response): Promise<void> => {
     throw new AppError('File not found', 404);
   }
 
+  // If it's a Cloudinary URL, redirect to it
+  if (file.filepath.startsWith('http')) {
+    res.redirect(file.filepath);
+    return;
+  }
+
+  // Local file
   const filePath = path.join(__dirname, '..', '..', 'uploads', path.basename(file.filepath));
   res.sendFile(filePath);
 };
@@ -116,8 +144,12 @@ export const deleteFileById = async (req: AuthRequest, res: Response): Promise<v
     throw new AppError('Forbidden', 403);
   }
 
-  // Delete file from filesystem
-  await deleteFile(path.join(__dirname, '..', '..', 'uploads', path.basename(file.filepath)));
+  // Delete from Cloudinary or local filesystem
+  if ((file as any).cloudinaryPublicId) {
+    await deleteFromCloudinary((file as any).cloudinaryPublicId);
+  } else if (!file.filepath.startsWith('http')) {
+    await deleteFile(path.join(__dirname, '..', '..', 'uploads', path.basename(file.filepath)));
+  }
 
   // Delete from database
   await prisma.grievanceFile.delete({
@@ -126,4 +158,3 @@ export const deleteFileById = async (req: AuthRequest, res: Response): Promise<v
 
   res.json({ message: 'File deleted successfully' });
 };
-

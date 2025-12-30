@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { ArrowBigUp, MapPin, Clock, CheckCircle, ExternalLink } from "lucide-react";
 
 interface GrievanceCardProps {
@@ -33,6 +34,9 @@ export function GrievanceCard({
   verifiedOnChain,
   blockchainTxHash,
 }: GrievanceCardProps) {
+  const [imageError, setImageError] = useState(false);
+  const showImage = image && !imageError;
+
   const statusConfig = {
     pending: { bg: "#f1f5f9", color: "#64748b", border: "#e2e8f0", label: "Pending" },
     "in-progress": { bg: "#f1f5f9", color: "#1e293b", border: "#cbd5e1", label: "In Progress" },
@@ -57,13 +61,13 @@ export function GrievanceCard({
     >
       <div style={{ display: "flex", flexDirection: "column" }}>
         {/* Image */}
-        {image && (
+        {showImage && (
           <div style={{ position: "relative", height: "180px", backgroundColor: "#f3f4f6" }}>
             <img
               src={image}
               alt={title}
               style={{ width: "100%", height: "100%", objectFit: "cover" }}
-              onError={(e) => { e.currentTarget.style.display = "none"; }}
+              onError={() => setImageError(true)}
             />
             {/* Status badge on image */}
             <div
@@ -89,7 +93,7 @@ export function GrievanceCard({
         {/* Content */}
         <div style={{ padding: "20px" }}>
           {/* Status badge if no image */}
-          {!image && (
+          {!showImage && (
             <div
               style={{
                 display: "inline-flex",

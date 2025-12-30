@@ -110,7 +110,7 @@ export default function App() {
   const isCitizen = userRole === "citizen";
   const userInitials = useMemo(() => {
     if (!authUser?.name) return isCitizen ? "C" : "A";
-    return authUser.name.split(" ").map(part => part[0]).join("").slice(0, 2).toUpperCase();
+    return authUser.name.split(" ").map((part: string) => part[0]).join("").slice(0, 2).toUpperCase();
   }, [authUser?.name, isCitizen]);
 
   // Static pages
@@ -154,7 +154,7 @@ export default function App() {
           {/* Nav Items */}
           <nav style={{ flex: 1, padding: "0 16px" }}>
             {isCitizen ? (
-              navItems.filter(item => item.id !== "file").map((item) => {
+              navItems.filter((item: any) => item.id !== "file").map((item: any) => {
                 const Icon = item.icon;
                 const isActive = activeScreen === item.id;
                 return (
@@ -331,7 +331,7 @@ export default function App() {
           {/* Mobile Bottom Navigation */}
           {isCitizen && (
             <nav className="app-mobile-nav" style={{ display: "flex", position: "fixed", bottom: "12px", left: "12px", right: "12px", backgroundColor: "#ffffff", borderRadius: "16px", boxShadow: "0 4px 20px rgba(0,0,0,0.1)", border: "1px solid #e5e7eb", zIndex: 50, padding: "8px" }}>
-              {navItems.map((item) => {
+              {navItems.map((item: any) => {
                 const Icon = item.icon;
                 const isActive = activeScreen === item.id;
                 const isFileButton = item.id === "file";

@@ -5,6 +5,7 @@ import config from './config/env';
 import prisma from './config/database';
 import blockchainService from './services/blockchain.service';
 import type { BlockchainGrievanceRegisteredEvent, BlockchainStatusUpdatedEvent } from './services/blockchain.service';
+import escalationService from './services/escalation.service';
 
 const PORT = config.port;
 
@@ -14,7 +15,7 @@ const httpServer = createServer(app);
 // Initialize Socket.IO with CORS
 const io = new SocketIOServer(httpServer, {
   cors: {
-    origin: config.frontendUrl || '*',
+    origin: config.corsOrigin || '*',
     methods: ['GET', 'POST'],
     credentials: true,
   },
@@ -90,19 +91,13 @@ const server = httpServer.listen(PORT, async () => {
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`📊 Environment: ${config.nodeEnv}`);
   console.log(`🔌 WebSocket server initialized`);
-  console.log(`🌐 Frontend URL: ${config.frontendUrl}`);
 
   // Test database connection
   try {
     await prisma.$connect();
-    console.log('✅ Database connected successfully');
-    
-    // Test a simple query
-    const userCount = await prisma.user.count();
-    console.log(`📊 Database health check: ${userCount} users in database`);
+    console.log('✅ Database connected');
   } catch (error) {
     console.error('❌ Database connection failed:', error);
-    console.error('Database URL (masked):', config.databaseUrl.replace(/:[^:@]*@/, ':***@'));
     process.exit(1);
   }
 
@@ -110,15 +105,16 @@ const server = httpServer.listen(PORT, async () => {
   if (blockchainService.isAvailable()) {
     try {
       await blockchainService.startEventListening();
-      console.log('✅ Blockchain event listeners started');
     } catch (error) {
       console.error('⚠️ Failed to start blockchain event listeners:', error);
     }
   } else {
     console.log('⚠️ Blockchain service not available, event listening disabled');
   }
-  
-  console.log('🎉 Server startup completed successfully');
+
+  // Start auto-escalation service (check every 60 minutes)
+  escalationService.startPeriodicCheck(60);
+  console.log('⏰ Auto-escalation service started');
 });
 
 // Handle server errors (e.g., port already in use)

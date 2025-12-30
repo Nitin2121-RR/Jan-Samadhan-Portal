@@ -1,4 +1,4 @@
-import { MapPin, Clock, AlertTriangle, Users, TrendingUp, CheckCircle2, ExternalLink, CheckCircle } from "lucide-react";
+import { MapPin, Clock, AlertTriangle, Users, TrendingUp, CheckCircle2, ExternalLink, CheckCircle, Play, Check, Calendar } from "lucide-react";
 
 interface PriorityBreakdown {
   totalScore: number;
@@ -29,7 +29,11 @@ interface PriorityGrievanceCardProps {
   blockchainTxHash?: string | null;
   contractAddress?: string | null;
   priorityBreakdown?: PriorityBreakdown;
+  expectedResolutionDays?: number;
+  estimatedResolutionDate?: string;
   onAcknowledge?: () => void;
+  onStartProgress?: () => void;
+  onResolve?: () => void;
   onClick?: () => void;
 }
 
@@ -51,9 +55,18 @@ export function PriorityGrievanceCard({
   verifiedOnChain,
   blockchainTxHash,
   priorityBreakdown,
+  expectedResolutionDays,
+  estimatedResolutionDate,
   onAcknowledge,
+  onStartProgress,
+  onResolve,
   onClick
 }: PriorityGrievanceCardProps) {
+  // Calculate if ETA is overdue
+  const isOverdue = estimatedResolutionDate && new Date(estimatedResolutionDate) < new Date() && status !== "resolved";
+  const daysRemaining = estimatedResolutionDate
+    ? Math.ceil((new Date(estimatedResolutionDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))
+    : null;
   const urgencyColors = {
     critical: { bg: "#991b1b", label: "CRITICAL" },
     high: { bg: "#78716c", label: "HIGH" },
@@ -172,7 +185,9 @@ export function PriorityGrievanceCard({
             <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "13px", color: "#6b7280" }}>
               <MapPin style={{ width: "14px", height: "14px" }} />
               <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{location}</span>
-              <span style={{ padding: "2px 8px", backgroundColor: "#f3f4f6", borderRadius: "4px", fontSize: "12px", fontWeight: 500 }}>{ward}</span>
+              {ward && ward !== "Unassigned" && (
+                <span style={{ padding: "2px 8px", backgroundColor: "#f3f4f6", borderRadius: "4px", fontSize: "12px", fontWeight: 500 }}>{ward}</span>
+              )}
             </div>
           </div>
         </div>
@@ -220,32 +235,106 @@ export function PriorityGrievanceCard({
           </div>
         </div>
 
-        {/* Submitted By and Acknowledge Button */}
+        {/* ETA Display */}
+        {expectedResolutionDays && status !== "resolved" && (
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              padding: "12px 16px",
+              backgroundColor: isOverdue ? "#fef2f2" : "#f0fdf4",
+              border: `1px solid ${isOverdue ? "#fecaca" : "#bbf7d0"}`,
+              borderRadius: "10px",
+              marginBottom: "16px",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <Calendar style={{ width: "16px", height: "16px", color: isOverdue ? "#dc2626" : "#16a34a" }} />
+              <span style={{ fontSize: "13px", fontWeight: 500, color: isOverdue ? "#dc2626" : "#166534" }}>
+                {isOverdue ? "Overdue" : "ETA"}: {expectedResolutionDays} days
+              </span>
+            </div>
+            <span style={{ fontSize: "12px", color: isOverdue ? "#dc2626" : "#16a34a", fontWeight: 600 }}>
+              {isOverdue
+                ? `${Math.abs(daysRemaining || 0)} days overdue`
+                : daysRemaining !== null && daysRemaining > 0
+                  ? `${daysRemaining} days remaining`
+                  : "Due today"}
+            </span>
+          </div>
+        )}
+
+        {/* Submitted By and Action Buttons */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px" }}>
           <div style={{ fontSize: "13px", color: "#6b7280", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
             By: {submittedBy}
           </div>
-          {status === "pending" && (
-            <button
-              onClick={(e) => { e.stopPropagation(); onAcknowledge?.(); }}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "6px",
-                padding: "8px 16px",
-                backgroundColor: "#1e293b",
-                color: "#ffffff",
-                border: "none",
-                borderRadius: "8px",
-                fontSize: "13px",
-                fontWeight: 600,
-                cursor: "pointer",
-              }}
-            >
-              <CheckCircle2 style={{ width: "16px", height: "16px" }} />
-              Acknowledge
-            </button>
-          )}
+          <div style={{ display: "flex", gap: "8px" }}>
+            {status === "pending" && (
+              <button
+                onClick={(e) => { e.stopPropagation(); onAcknowledge?.(); }}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px",
+                  padding: "8px 16px",
+                  backgroundColor: "#1e293b",
+                  color: "#ffffff",
+                  border: "none",
+                  borderRadius: "8px",
+                  fontSize: "13px",
+                  fontWeight: 600,
+                  cursor: "pointer",
+                }}
+              >
+                <CheckCircle2 style={{ width: "16px", height: "16px" }} />
+                Acknowledge
+              </button>
+            )}
+            {status === "acknowledged" && (
+              <button
+                onClick={(e) => { e.stopPropagation(); onStartProgress?.(); }}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px",
+                  padding: "8px 16px",
+                  backgroundColor: "#0369a1",
+                  color: "#ffffff",
+                  border: "none",
+                  borderRadius: "8px",
+                  fontSize: "13px",
+                  fontWeight: 600,
+                  cursor: "pointer",
+                }}
+              >
+                <Play style={{ width: "16px", height: "16px" }} />
+                Start Progress
+              </button>
+            )}
+            {status === "in-progress" && (
+              <button
+                onClick={(e) => { e.stopPropagation(); onResolve?.(); }}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px",
+                  padding: "8px 16px",
+                  backgroundColor: "#16a34a",
+                  color: "#ffffff",
+                  border: "none",
+                  borderRadius: "8px",
+                  fontSize: "13px",
+                  fontWeight: 600,
+                  cursor: "pointer",
+                }}
+              >
+                <Check style={{ width: "16px", height: "16px" }} />
+                Mark Resolved
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Footer - Category and Blockchain */}

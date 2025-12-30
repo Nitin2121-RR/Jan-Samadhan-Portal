@@ -13,6 +13,10 @@ const envSchema = z.object({
   MAX_FILE_SIZE: z.string().default('10485760'),
   UPLOAD_DIR: z.string().default('./uploads'),
   FRONTEND_URL: z.string().default('http://localhost:3000'),
+  // Cloudinary configuration
+  CLOUDINARY_CLOUD_NAME: z.string().optional(),
+  CLOUDINARY_API_KEY: z.string().optional(),
+  CLOUDINARY_API_SECRET: z.string().optional(),
   // Blockchain configuration
   BLOCKCHAIN_RPC_URL: z.string().optional(),
   SEPOLIA_RPC_URL: z.string().optional(),
@@ -39,6 +43,11 @@ export default {
     uploadDir: env.UPLOAD_DIR,
   },
   frontendUrl: env.FRONTEND_URL,
+  cloudinary: {
+    cloudName: env.CLOUDINARY_CLOUD_NAME,
+    apiKey: env.CLOUDINARY_API_KEY,
+    apiSecret: env.CLOUDINARY_API_SECRET,
+  },
   blockchain: {
     rpcUrl: env.BLOCKCHAIN_RPC_URL || env.SEPOLIA_RPC_URL,
     contractAddress: env.CONTRACT_ADDRESS,

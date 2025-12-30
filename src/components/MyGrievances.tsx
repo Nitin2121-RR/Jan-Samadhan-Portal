@@ -78,7 +78,6 @@ export function MyGrievances() {
         assignedTo: g.assignedTo?.name ? `${g.assignedTo.name}` : undefined,
         resolvedDate: g.resolvedAt ? formatResolvedDate(g.resolvedAt) : undefined,
         resolvedBy: g.assignedTo?.name,
-        image: g.files?.[0]?.filepath,
         verifiedOnChain: g.verifiedOnChain,
         blockchainTxHash: g.blockchainTxHash,
       }));
@@ -327,19 +326,25 @@ export function MyGrievances() {
                 </div>
               )}
 
-              {/* Waiting card for pending */}
+              {/* Pending status card */}
               {grievance.status === "pending" && (
                 <div
                   style={{
-                    backgroundColor: "#f1f5f9",
+                    backgroundColor: grievance.assignedTo ? "#e0f2fe" : "#f1f5f9",
                     borderRadius: "12px",
                     padding: "16px 20px",
-                    border: "1px solid #e2e8f0",
+                    border: grievance.assignedTo ? "1px solid #7dd3fc" : "1px solid #e2e8f0",
                   }}
                 >
-                  <p style={{ fontSize: "14px", color: "#64748b", margin: 0 }}>
-                    Waiting for assignment • {grievance.eta}
-                  </p>
+                  {grievance.assignedTo ? (
+                    <p style={{ fontSize: "14px", color: "#0369a1", margin: 0 }}>
+                      Assigned to: {grievance.assignedTo} • {grievance.eta}
+                    </p>
+                  ) : (
+                    <p style={{ fontSize: "14px", color: "#64748b", margin: 0 }}>
+                      Waiting for assignment • {grievance.eta}
+                    </p>
+                  )}
                 </div>
               )}
 

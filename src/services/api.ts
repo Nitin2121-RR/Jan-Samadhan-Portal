@@ -1,4 +1,4 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://jansam-production.up.railway.app/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
 
 class ApiClient {
   private baseURL: string;
@@ -239,6 +239,16 @@ class ApiClient {
     return this.request<{ grievance: any }>(
       `/authority/grievances/${id}/acknowledge`,
       { method: 'POST' }
+    );
+  }
+
+  async updateGrievanceStatus(id: string, status: string, message?: string) {
+    return this.request<{ grievance: any }>(
+      `/authority/grievances/${id}/status`,
+      {
+        method: 'PATCH',
+        body: JSON.stringify({ status, message }),
+      }
     );
   }
 

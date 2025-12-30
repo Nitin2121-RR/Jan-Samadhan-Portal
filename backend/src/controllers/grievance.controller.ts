@@ -97,6 +97,10 @@ export const createGrievance = async (req: AuthRequest, res: Response): Promise<
     assignedToId = anyAuthority?.id;
   }
 
+  // Calculate estimated resolution date based on AI-determined days
+  const estimatedResolutionDate = new Date();
+  estimatedResolutionDate.setDate(estimatedResolutionDate.getDate() + categorization.expectedResolutionDays);
+
   // Create grievance with all AI-enhanced data
   const grievance = await prisma.grievance.create({
     data: {
@@ -107,6 +111,8 @@ export const createGrievance = async (req: AuthRequest, res: Response): Promise<
       departmentId: categorization.departmentId,
       priorityScore: categorization.priorityScore,
       severity: categorization.severity,
+      expectedResolutionDays: categorization.expectedResolutionDays,
+      estimatedResolutionDate: estimatedResolutionDate,
       latitude: data.latitude,
       longitude: data.longitude,
       address: data.address,
@@ -217,28 +223,28 @@ export const createGrievance = async (req: AuthRequest, res: Response): Promise<
               verifiedOnChain: true,
             },
           });
+
+          // Store AI analysis hash AFTER grievance is registered on blockchain
+          blockchainService
+            .updateGrievanceStatus(result.hash, 'ai_analyzed', `AI Analysis Hash: ${aiAnalysisHash}`)
+            .catch((error) => {
+              console.error('Failed to store AI analysis on blockchain:', error);
+            });
         }
       })
       .catch((error) => {
         console.error('Failed to store grievance on blockchain:', error);
-      });
-
-    // Also store AI analysis hash on blockchain
-    blockchainService
-      .updateGrievanceStatus(blockchainHash, 'ai_analyzed', `AI Analysis Hash: ${aiAnalysisHash}`)
-      .catch((error) => {
-        console.error('Failed to store AI analysis on blockchain:', error);
       });
   }
 
   res.status(201).json({
     grievance: {
       ...grievance,
-      upvotes: 0, // Initialize with 0 upvotes for new grievance
+      upvotes: grievance._count.upvotes,
       blockchainHash: blockchainHash,
       verifiedOnChain: false,
       blockchainTxHash: null,
-      assignedTo: null, // Will be populated if assigned
+      assignedTo: grievance.assignedTo,
     },
     aiAnalysis: {
       categorization: {

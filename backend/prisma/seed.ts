@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, AuthorityLevel } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
@@ -44,16 +44,16 @@ async function main() {
   console.log('\n👤 Creating test authority accounts...');
 
   const testAuthorities = [
-    { code: 'PWD', email: 'gro.pwd@test.com', name: 'Rajesh Kumar (PWD)', level: 'gro' as const },
-    { code: 'PHED', email: 'gro.water@test.com', name: 'Suresh Sharma (Water)', level: 'gro' as const },
-    { code: 'MC-SAN', email: 'gro.sanitation@test.com', name: 'Amit Singh (Sanitation)', level: 'gro' as const },
-    { code: 'MC-ELEC', email: 'gro.electrical@test.com', name: 'Mohan Das (Electrical)', level: 'gro' as const },
-    { code: 'HEALTH', email: 'gro.health@test.com', name: 'Dr. Priya Patel (Health)', level: 'gro' as const },
-    { code: 'POLICE', email: 'gro.police@test.com', name: 'Inspector Vijay (Police)', level: 'gro' as const },
-    { code: 'DISCOM', email: 'gro.electricity@test.com', name: 'Ramesh Verma (Electricity)', level: 'gro' as const },
-    { code: 'EDU', email: 'gro.education@test.com', name: 'Sunita Devi (Education)', level: 'gro' as const },
-    { code: 'DC', email: 'nodal.dc@test.com', name: 'Collector Office Nodal', level: 'nodal_officer' as const },
-    { code: 'DC', email: 'director.dc@test.com', name: 'District Director', level: 'director' as const },
+    { code: 'PWD', email: 'gro.pwd@test.com', name: 'Rajesh Kumar (PWD)', level: AuthorityLevel.gro },
+    { code: 'PHED', email: 'gro.water@test.com', name: 'Suresh Sharma (Water)', level: AuthorityLevel.gro },
+    { code: 'MC-SAN', email: 'gro.sanitation@test.com', name: 'Amit Singh (Sanitation)', level: AuthorityLevel.gro },
+    { code: 'MC-ELEC', email: 'gro.electrical@test.com', name: 'Mohan Das (Electrical)', level: AuthorityLevel.gro },
+    { code: 'HEALTH', email: 'gro.health@test.com', name: 'Dr. Priya Patel (Health)', level: AuthorityLevel.gro },
+    { code: 'POLICE', email: 'gro.police@test.com', name: 'Inspector Vijay (Police)', level: AuthorityLevel.gro },
+    { code: 'DISCOM', email: 'gro.electricity@test.com', name: 'Ramesh Verma (Electricity)', level: AuthorityLevel.gro },
+    { code: 'EDU', email: 'gro.education@test.com', name: 'Sunita Devi (Education)', level: AuthorityLevel.gro },
+    { code: 'DC', email: 'nodal.dc@test.com', name: 'Collector Office Nodal', level: AuthorityLevel.nodal_officer },
+    { code: 'DC', email: 'director.dc@test.com', name: 'District Director', level: AuthorityLevel.director },
   ];
 
   for (const auth of testAuthorities) {
@@ -67,8 +67,8 @@ async function main() {
         departmentId: deptId,
         authorityLevel: auth.level,
         department: dept?.name,
-        position: auth.level === 'director' ? 'Director' :
-                  auth.level === 'nodal_officer' ? 'Nodal Officer' : 'GRO',
+        position: auth.level === AuthorityLevel.director ? 'Director' :
+                  auth.level === AuthorityLevel.nodal_officer ? 'Nodal Officer' : 'GRO',
       },
       create: {
         email: auth.email,
@@ -78,8 +78,8 @@ async function main() {
         departmentId: deptId,
         authorityLevel: auth.level,
         department: dept?.name,
-        position: auth.level === 'director' ? 'Director' :
-                  auth.level === 'nodal_officer' ? 'Nodal Officer' : 'GRO',
+        position: auth.level === AuthorityLevel.director ? 'Director' :
+                  auth.level === AuthorityLevel.nodal_officer ? 'Nodal Officer' : 'GRO',
       },
     });
     console.log(`  ✓ ${auth.email} (${auth.level})`);
@@ -98,7 +98,7 @@ async function main() {
       department: 'Municipal Corporation',
       position: 'Municipal Engineer',
       departmentId: createdDepartments['DC'],
-      authorityLevel: 'gro',
+      authorityLevel: AuthorityLevel.gro,
     },
   });
   console.log('  ✓ authority@test.com (legacy)');
