@@ -48,6 +48,15 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.status(200).json({ 
+    status: 'ok', 
+    timestamp: new Date().toISOString(),
+    service: 'jan-samadhan-backend'
+  });
+});
+
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/grievances', grievanceRoutes);
