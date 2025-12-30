@@ -30,7 +30,7 @@ export interface BlockchainHistory {
 class BlockchainService {
   async verifyGrievance(grievanceId: string): Promise<BlockchainVerification> {
     try {
-      const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+      const baseURL = import.meta.env.VITE_API_URL || 'https://jansam-production.up.railway.app/api';
       const response = await fetch(`${baseURL}/blockchain/verify-grievance/${grievanceId}`, {
         headers: {
           Authorization: `Bearer ${this.getToken()}`,
@@ -50,7 +50,7 @@ class BlockchainService {
 
   async getGrievanceHistory(grievanceId: string): Promise<BlockchainHistory> {
     try {
-      const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+      const baseURL = import.meta.env.VITE_API_URL || 'https://jansam-production.up.railway.app/api';
       const response = await fetch(`${baseURL}/blockchain/grievance/${grievanceId}/history`, {
         headers: {
           Authorization: `Bearer ${this.getToken()}`,
@@ -70,7 +70,7 @@ class BlockchainService {
 
   async getContractAddress(): Promise<{ contractAddress: string | null; network: string; available: boolean }> {
     try {
-      const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+      const baseURL = import.meta.env.VITE_API_URL || 'https://jansam-production.up.railway.app/api';
       const response = await fetch(`${baseURL}/blockchain/contract-address`);
       return await response.json();
     } catch (error) {

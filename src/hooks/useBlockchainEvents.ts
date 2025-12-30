@@ -57,7 +57,7 @@ export function useBlockchainEvents(options: UseBlockchainEventsOptions = {}) {
 
   // Get WebSocket URL from API URL
   const getSocketUrl = () => {
-    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+    const apiUrl = import.meta.env.VITE_API_URL || 'https://jansam-production.up.railway.app/api';
     // Extract base URL without /api
     return apiUrl.replace('/api', '');
   };
