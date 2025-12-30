@@ -234,11 +234,11 @@ export const createGrievance = async (req: AuthRequest, res: Response): Promise<
   res.status(201).json({
     grievance: {
       ...grievance,
-      upvotes: grievance._count.upvotes,
+      upvotes: 0, // Initialize with 0 upvotes for new grievance
       blockchainHash: blockchainHash,
       verifiedOnChain: false,
       blockchainTxHash: null,
-      assignedTo: grievance.assignedTo,
+      assignedTo: null, // Will be populated if assigned
     },
     aiAnalysis: {
       categorization: {

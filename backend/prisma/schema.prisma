@@ -1,4 +1,4 @@
-// SQLite version for local development
+// PostgreSQL version for production deployment
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
@@ -7,11 +7,29 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = "file:./dev.db"
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
-// SQLite doesn't support enums, so we use String with constraints
+enum UserRole {
+  citizen
+  authority
+}
+
+enum AuthorityLevel {
+  director        // Director of Grievances
+  nodal_officer   // Nodal Public Grievance Officer
+  gro             // Grievance Redressal Officer
+  field_officer   // Subordinate/Field Officer
+}
+
+enum GrievanceStatus {
+  pending
+  acknowledged
+  in_progress
+  resolved
+  escalated
+}
 
 model Department {
   id          String   @id @default(uuid())
@@ -34,7 +52,7 @@ model User {
   password  String
   name      String
   phone     String?
-  role      String @default("citizen") // "citizen" or "authority"
+  role      UserRole @default(citizen)
   
   // Citizen fields
   address   String?
@@ -46,7 +64,7 @@ model User {
   // New department relation
   departmentId    String?
   department_rel  Department?     @relation(fields: [departmentId], references: [id])
-  authorityLevel  String? // "director", "nodal_officer", "gro", "field_officer"
+  authorityLevel  AuthorityLevel?
 
   // Blockchain fields
   walletAddress String? @unique
@@ -71,7 +89,7 @@ model Grievance {
   department    String?         // Legacy field
   departmentId  String?
   department_rel Department?    @relation(fields: [departmentId], references: [id])
-  status        String @default("pending") // "pending", "acknowledged", "in_progress", "resolved", "escalated"
+  status        GrievanceStatus @default(pending)
   priorityScore Int             @default(0)
   severity      Int             @default(1)
 
@@ -81,16 +99,16 @@ model Grievance {
   address       String?
   ward          String?
 
-  // AI Features - SQLite doesn't support arrays, so we'll use JSON strings
-  embedding         String?       // JSON string of vector embedding
+  // AI Features - PostgreSQL supports arrays and JSON
+  embedding         Float[]       // Vector embedding for duplicate detection
   detectedLanguage  String?       // Original language detected (e.g., "hi", "en", "ta")
   translatedTitle   String?       // English translation if original was in another language
   translatedDesc    String?       // English translation of description
   autoResponse      String?       // AI-generated acknowledgment response
-  imageAnalysis     String?       // JSON string of AI analysis
+  imageAnalysis     Json?         // AI analysis of uploaded images
   aiAnalysisHash    String?       // Hash of AI analysis for blockchain verification
   duplicateOf       String?       // ID of original grievance if this is a duplicate
-  similarGrievances String?       // JSON string of similar grievance IDs
+  similarGrievances String[]      // IDs of similar grievances
 
   // Relations
   userId        String
@@ -134,7 +152,7 @@ model GrievanceUpdate {
   userId      String
   user        User            @relation(fields: [userId], references: [id])
   message     String?
-  status      String? // "pending", "acknowledged", "in_progress", "resolved", "escalated"
+  status      GrievanceStatus?
   
   // Blockchain fields
   blockchainTxHash String?

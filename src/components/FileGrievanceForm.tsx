@@ -340,17 +340,8 @@ export function FileGrievanceForm({ onSubmit, onCancel }: FileGrievanceFormProps
   };
 
   return (
-    <div 
-      className="space-y-6" 
-      style={{ 
-        padding: "24px",
-        paddingTop: "20px",
-        paddingBottom: "20px",
-        backgroundColor: "#ffffff",
-        borderRadius: "12px",
-        border: "1px solid #e5e7eb"
-      }}
-    >
+    <div style={{ padding: "24px" }}>
+      <div className="space-y-6">
       <PageHeader
         title={step === 4 ? "Grievance Submitted" : "File a Grievance"}
         description={step === 4 ? "AI analysis complete." : `Step ${step} of 3`}
@@ -606,7 +597,7 @@ export function FileGrievanceForm({ onSubmit, onCancel }: FileGrievanceFormProps
         )}
 
         {step === 3 && (
-          <Card className="p-4 sm:p-6 space-y-6" style={{ padding: "20px" }}>
+          <Card className="p-4 sm:p-6 space-y-6" style={{ padding: "20px !important" }}>
             <div>
               <h2 className="text-lg font-semibold mb-1">Verify & Submit</h2>
               <p className="text-sm text-muted-foreground">
@@ -897,6 +888,8 @@ export function FileGrievanceForm({ onSubmit, onCancel }: FileGrievanceFormProps
           </div>
         )}
       </form>
+    </div>
+    </div>
     </div>
   );
 }
